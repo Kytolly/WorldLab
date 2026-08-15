@@ -32,14 +32,21 @@ class DashboardServer:
         *,
         host: str = "127.0.0.1",
         port: int = 0,
+        poll_interval_s: float = 1.0,
     ) -> None:
         if not host:
             raise ValueError("host must not be empty")
         if port < 0 or port > 65535:
             raise ValueError("port must be between 0 and 65535")
+        if poll_interval_s <= 0.0:
+            raise ValueError("poll_interval_s must be positive")
         self.source = source
         self.host = host
-        self._httpd = ThreadingHTTPServer((host, port), _make_handler(source))
+        self.poll_interval_s = float(poll_interval_s)
+        self._httpd = ThreadingHTTPServer(
+            (host, port),
+            _make_handler(source, self.poll_interval_s),
+        )
         self._thread: Optional[threading.Thread] = None
 
     @property
@@ -77,7 +84,7 @@ class DashboardServer:
         self.stop()
 
 
-def _make_handler(source: EventBuffer) -> type[BaseHTTPRequestHandler]:
+def _make_handler(source: EventBuffer, poll_interval_s: float) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, format: str, *args: object) -> None:
             del format, args
@@ -88,7 +95,7 @@ def _make_handler(source: EventBuffer) -> type[BaseHTTPRequestHandler]:
                 if parsed.path == "/":
                     self._send_bytes(
                         200,
-                        _render_dashboard_html(source.snapshot).encode("utf-8"),
+                        _render_dashboard_html(source.snapshot, poll_interval_s).encode("utf-8"),
                         "text/html; charset=utf-8",
                     )
                 elif parsed.path == "/healthz":
@@ -134,7 +141,7 @@ def _events_payload(source: EventBuffer, query: Mapping[str, Sequence[str]]) -> 
     }
 
 
-def _render_dashboard_html(snapshot: RuntimeSnapshot) -> str:
+def _render_dashboard_html(snapshot: RuntimeSnapshot, poll_interval_s: float = 1.0) -> str:
     """Inject a server-side first paint so the page is useful before JS polls."""
 
     payload = _snapshot_payload(snapshot)
@@ -168,6 +175,7 @@ def _render_dashboard_html(snapshot: RuntimeSnapshot) -> str:
         "__INITIAL_EVENT__": payload["last_event"] or "—",
         "__INITIAL_SNAPSHOT__": snapshot_text,
         "__INITIAL_ERROR__": error_text,
+        "__POLL_INTERVAL_MS__": str(max(1, int(poll_interval_s * 1000.0))),
     }
     rendered = DASHBOARD_HTML
     for token, value in replacements.items():
@@ -356,5 +364,5 @@ async function tick() {
     renderUnreachable(error);
   }
 }
-tick(); setInterval(tick, 1000);
+tick(); setInterval(tick, __POLL_INTERVAL_MS__);
 </script></body></html>"""

@@ -1,0 +1,17 @@
+# v0.2.1 configuration-driven ExampleWorldModel closed loop.
+defaults:
+  - ../base.yaml
+
+run:
+  name: example_chunk_demo
+
+rollout:
+  chunk_size: 4
+
+runtime:
+  step_delay_s: 0.6
+
+environment:
+  task:
+    goal: 4
+    max_episode_steps: 8

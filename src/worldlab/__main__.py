@@ -4,14 +4,28 @@ from __future__ import annotations
 
 import argparse
 import time
+from pathlib import Path
 
 from .acceptance import run_acceptance
-from .demo import run_demo
+from .config import ConfigError, load_config
+from .demo import run_configured_demo, run_demo
 from .runtime import DashboardServer, TraceRecorder
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the built-in WorldLab demo")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="load a layered YAML configuration through OmegaConf",
+    )
+    parser.add_argument(
+        "--override",
+        action="append",
+        default=[],
+        help="apply an OmegaConf dotlist override, for example rollout.chunk_size=1",
+    )
     parser.add_argument("--model", choices=("counter",), default="counter")
     parser.add_argument("--goal", type=int, default=3)
     parser.add_argument("--max-episode-steps", type=int, default=None)
@@ -46,6 +60,65 @@ def main() -> int:
         help="seconds to keep the dashboard alive after the demo (0 = no wait)",
     )
     args = parser.parse_args()
+
+    if args.config is not None:
+        if args.acceptance:
+            parser.error("--acceptance cannot be combined with --config")
+        try:
+            config = load_config(args.config, overrides=args.override)
+        except ConfigError as error:
+            parser.error(str(error))
+        values = config
+        trace_config = values.observability.trace
+        trace = (
+            TraceRecorder(max_events=int(trace_config.max_events))
+            if bool(trace_config.enabled)
+            else None
+        )
+        dashboard_config = values.observability.dashboard
+        dashboard = (
+            DashboardServer(
+                trace,
+                host=str(dashboard_config.host),
+                port=int(dashboard_config.port),
+                poll_interval_s=float(dashboard_config.poll_interval_s),
+            )
+            if trace is not None and bool(dashboard_config.enabled)
+            else None
+        )
+        if dashboard is not None:
+            dashboard.start()
+            print(f"WorldLab dashboard: {dashboard.url}", flush=True)
+        try:
+            result = run_configured_demo(config, trace=trace)
+        except Exception:
+            if dashboard is not None:
+                dashboard.stop()
+            if trace is not None:
+                print("closed_loop_trace")
+                print(trace.format_timeline())
+            raise
+        finally:
+            if dashboard is not None and float(dashboard_config.keep_alive_s) == 0.0:
+                dashboard.stop()
+        print("WorldLab configured demo")
+        print(f"total_reward={result.total_reward}")
+        print(f"length={result.length}")
+        print(f"terminated={result.terminated}")
+        print(f"truncated={result.truncated}")
+        if trace is not None:
+            print("closed_loop_trace")
+            print(trace.format_timeline())
+        if dashboard is not None and float(dashboard_config.keep_alive_s) > 0.0:
+            print(
+                "Dashboard remains available for "
+                f"{float(dashboard_config.keep_alive_s):.1f}s"
+            )
+            try:
+                time.sleep(float(dashboard_config.keep_alive_s))
+            finally:
+                dashboard.stop()
+        return 0
 
     if args.dashboard_seconds < 0.0:
         parser.error("--dashboard-seconds must be non-negative")

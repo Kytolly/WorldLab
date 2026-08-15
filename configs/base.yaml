@@ -1,0 +1,72 @@
+schema_version: 1
+
+run:
+  name: worldlab_demo
+  mode: demo
+  seed: 0
+  episodes: 1
+
+rollout:
+  chunk_size: 4
+
+world_model:
+  implementation: example
+  inference:
+    action_dim: 16
+    state_dim: 16
+    frame:
+      channels: 3
+      num_views: 3
+      height: 32
+      width: 32
+    noise_scale: 0.01
+
+simulator:
+  implementation: world_model
+
+environment:
+  implementation: simulator_environment
+  task:
+    implementation: chunk_goal
+    goal: 4
+    max_episode_steps: 8
+
+policy:
+  implementation: constant
+  inference:
+    action_value: 0.0
+
+agent:
+  implementation: policy_agent
+
+runtime:
+  training: false
+  deterministic: true
+  render: false
+  validate_spaces: true
+  safety_max_steps: 16
+  step_delay_s: 0.0
+
+training:
+  world_model:
+    mode: disabled
+    dataset: null
+    checkpoint: null
+  policy:
+    mode: disabled
+    dataset: null
+    checkpoint: null
+
+observability:
+  trace:
+    enabled: true
+    max_events: 4096
+  dashboard:
+    enabled: true
+    host: 127.0.0.1
+    port: 8765
+    poll_interval_s: 1.0
+    keep_alive_s: 30.0
+
+artifacts:
+  root_uri: null

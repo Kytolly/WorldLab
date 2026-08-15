@@ -73,6 +73,9 @@ def test_dashboard_rejects_invalid_port() -> None:
     with pytest.raises(ValueError, match="port"):
         DashboardServer(EventBuffer(), port=65536)
 
+    with pytest.raises(ValueError, match="poll_interval_s"):
+        DashboardServer(EventBuffer(), poll_interval_s=0.0)
+
 
 def test_dashboard_observes_an_intermediate_running_step() -> None:
     source = EventBuffer(max_events=32)

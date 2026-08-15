@@ -25,19 +25,24 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
         num_views: int = 3,
         frame_height: int = 32,
         frame_width: int = 32,
-        state_dim: int = 16,
+        action_dim: int = 16,
+        state_dim: Optional[int] = None,
         seed: int = 0,
         noise_scale: float = 0.01,
     ) -> None:
+        resolved_state_dim = action_dim if state_dim is None else state_dim
         for name, value in (
             ("chunk_size", chunk_size),
             ("num_views", num_views),
             ("frame_height", frame_height),
             ("frame_width", frame_width),
-            ("state_dim", state_dim),
+            ("action_dim", action_dim),
+            ("state_dim", resolved_state_dim),
         ):
             if value <= 0:
                 raise ValueError(f"{name} must be greater than zero")
+        if action_dim != resolved_state_dim:
+            raise ValueError("ExampleWorldModel currently requires action_dim == state_dim")
         if noise_scale < 0.0:
             raise ValueError("noise_scale must be non-negative")
 
@@ -45,7 +50,8 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
         self.num_views = int(num_views)
         self.frame_height = int(frame_height)
         self.frame_width = int(frame_width)
-        self.state_dim = int(state_dim)
+        self.action_dim = int(action_dim)
+        self.state_dim = int(resolved_state_dim)
         self.seed = int(seed)
         self.noise_scale = float(noise_scale)
         self._rng = np.random.default_rng(self.seed)
@@ -58,17 +64,26 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
         self._chunk_index = 0
 
     @classmethod
-    def from_config(cls, config: Mapping[str, Any]) -> "ExampleWorldModel":
-        if "chunk_size" not in config:
-            raise ValueError("ExampleWorldModel config requires chunk_size")
+    def from_config(
+        cls,
+        config: Mapping[str, Any],
+        *,
+        chunk_size: Optional[int] = None,
+    ) -> "ExampleWorldModel":
+        values: Mapping[str, Any] = config.get("inference", config)
+        resolved_chunk_size = chunk_size if chunk_size is not None else values.get("chunk_size")
+        if resolved_chunk_size is None:
+            raise ValueError("ExampleWorldModel config requires rollout.chunk_size")
+        frame = values.get("frame", {})
         return cls(
-            chunk_size=int(config["chunk_size"]),
-            num_views=int(config.get("num_views", 3)),
-            frame_height=int(config.get("frame_height", 32)),
-            frame_width=int(config.get("frame_width", 32)),
-            state_dim=int(config.get("state_dim", 16)),
-            seed=int(config.get("seed", 0)),
-            noise_scale=float(config.get("noise_scale", 0.01)),
+            chunk_size=int(resolved_chunk_size),
+            num_views=int(values.get("num_views", frame.get("num_views", 3))),
+            frame_height=int(values.get("frame_height", frame.get("height", 32))),
+            frame_width=int(values.get("frame_width", frame.get("width", 32))),
+            action_dim=int(values.get("action_dim", 16)),
+            state_dim=(int(values["state_dim"]) if values.get("state_dim") is not None else None),
+            seed=int(values.get("seed", 0)),
+            noise_scale=float(values.get("noise_scale", 0.01)),
         )
 
     @property

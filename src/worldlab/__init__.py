@@ -3,7 +3,8 @@
 from .agents import PolicyAgent
 from .acceptance import AcceptanceReport, run_acceptance
 from .buffers import Buffer, ReplayBuffer
-from .core import Agent, DiscreteSpace, Environment, Learner, Policy, Simulator, Space, Task
+from .config import ConfigError, config_to_dict, load_config
+from .core import Agent, ArraySpace, DiscreteSpace, Environment, Learner, Policy, Simulator, Space, Task
 from .data import (
     EnvironmentStepped,
     EpisodeEnded,
@@ -29,12 +30,20 @@ from .data import (
     WorldModelContext,
     WorldModelStepResult,
 )
-from .demo import build_demo, run_demo, run_deterministic_demo
+from .demo import (
+    build_configured_demo,
+    build_demo,
+    run_configured_demo,
+    run_demo,
+    run_deterministic_demo,
+)
 from .envs import (
+    ChunkGoalTask,
     GoalTask,
     SimulatorEnvironment,
     TimeLimitWrapper,
     make_counter_environment,
+    make_example_environment,
 )
 from .policies import ConstantPolicy
 from .runtime import (
@@ -51,8 +60,11 @@ from .simulators import WorldModelSimulator
 
 __all__ = [
     "Agent",
+    "ArraySpace",
     "AcceptanceReport",
     "Buffer",
+    "ConfigError",
+    "config_to_dict",
     "ConstantPolicy",
     "CounterWorldModel",
     "DiscreteSpace",
@@ -100,9 +112,14 @@ __all__ = [
     "WorldModelStepResult",
     "WorldModelSimulator",
     "GoalTask",
+    "ChunkGoalTask",
     "build_demo",
+    "build_configured_demo",
     "make_counter_environment",
+    "make_example_environment",
     "run_demo",
+    "run_configured_demo",
     "run_deterministic_demo",
     "run_acceptance",
+    "load_config",
 ]

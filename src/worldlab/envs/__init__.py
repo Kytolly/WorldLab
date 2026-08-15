@@ -2,6 +2,7 @@
 
 from .toy import GoalTask, make_counter_environment
 from .simulator_env import SimulatorEnvironment
+from .example import ChunkGoalTask, make_example_environment
 from .wrappers import (
     ActionWrapper,
     EnvironmentWrapper,
@@ -17,6 +18,8 @@ __all__ = [
     "ObservationWrapper",
     "RewardWrapper",
     "SimulatorEnvironment",
+    "ChunkGoalTask",
+    "make_example_environment",
     "TimeLimitWrapper",
     "make_counter_environment",
 ]

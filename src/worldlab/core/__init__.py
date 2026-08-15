@@ -5,10 +5,11 @@ from .env import Environment, Space, Task
 from .learner import Learner
 from .policy import Policy
 from .simulator import Simulator
-from .spaces import DiscreteSpace
+from .spaces import ArraySpace, DiscreteSpace
 
 __all__ = [
     "Agent",
+    "ArraySpace",
     "DiscreteSpace",
     "Environment",
     "Learner",
