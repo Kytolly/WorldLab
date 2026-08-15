@@ -59,6 +59,12 @@ def test_read_only_dashboard_exposes_snapshot_and_events() -> None:
         events = json.loads(events_body)
         assert [event["sequence"] for event in events["events"]] == [7, 8]
         assert events["latest_sequence"] == 8
+        _, _, step_events_body = _get(
+            f"http://127.0.0.1:{dashboard.port}/api/events?after=2&limit=10"
+        )
+        step_events = json.loads(step_events_body)["events"]
+        assert step_events[0]["kind"] == "environment_stepped"
+        assert "info" in step_events[0]
 
         request = urllib.request.Request(
             f"http://127.0.0.1:{dashboard.port}/api/status",

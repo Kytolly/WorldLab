@@ -234,6 +234,7 @@ def _event_payload(event: RuntimeEvent) -> dict[str, Any]:
                 "reward": event.reward,
                 "terminated": event.terminated,
                 "truncated": event.truncated,
+                "info": _safe_value(event.info),
             }
         )
     elif isinstance(event, TransitionCommitted):

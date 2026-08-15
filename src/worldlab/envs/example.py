@@ -19,8 +19,8 @@ from .wrappers import TimeLimitWrapper
 Array = NDArray[Any]
 
 
-class ChunkGoalTask(Task[Array, Array, Array]):
-    """Emit one reward per generated chunk until the configured goal."""
+class ExampleTask(Task[Array, Array, Array]):
+    """Define reward and termination semantics for the Example environment."""
 
     def __init__(self, goal: int) -> None:
         if goal <= 0:
@@ -41,12 +41,30 @@ class ChunkGoalTask(Task[Array, Array, Array]):
         del previous_state, action
         self._steps += 1
         info = {"goal": self.goal, "chunk_step": self._steps, **dict(simulation.info)}
+        info["action"] = simulation.action
+        info["frames"] = simulation.frames
         return StepResult(
             observation=simulation.state,
             reward=1.0,
             terminated=self._steps >= self.goal,
             truncated=False,
             info=info,
+        )
+
+
+class ExampleEnvironment(SimulatorEnvironment[Array, Array, Array]):
+    """Compose ExampleWorldModel's simulator with ExampleTask."""
+
+    def __init__(self, model: ExampleWorldModel, *, goal: int) -> None:
+        state_shape = (model.chunk_size, model.state_dim)
+        super().__init__(
+            WorldModelSimulator(model, chunk_size=model.chunk_size),
+            ExampleTask(goal),
+            observation_space=ArraySpace((model.frame_shape, state_shape), dtype=np.float32),
+            action_space=ArraySpace(
+                (model.chunk_size, model.action_dim),
+                dtype=np.float32,
+            ),
         )
 
 
@@ -58,15 +76,7 @@ def make_example_environment(
 ) -> Environment[Array, Array]:
     """Build a simulator-backed environment with fixed chunk-level spaces."""
 
-    state_shape = (model.chunk_size, model.state_dim)
-    observation_space = ArraySpace((model.frame_shape, state_shape), dtype=np.float32)
-    action_space = ArraySpace((model.chunk_size, model.action_dim), dtype=np.float32)
-    environment: Environment[Array, Array] = SimulatorEnvironment(
-        WorldModelSimulator(model),
-        ChunkGoalTask(goal),
-        observation_space=observation_space,
-        action_space=action_space,
-    )
+    environment: Environment[Array, Array] = ExampleEnvironment(model, goal=goal)
     if max_episode_steps is not None:
         environment = TimeLimitWrapper(environment, max_episode_steps)
     return environment

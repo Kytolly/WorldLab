@@ -18,8 +18,16 @@ _UNSET = object()
 class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, ActionT]):
     """Own episode state while delegating generation to a WorldModel."""
 
-    def __init__(self, model: WorldModel[ContextT, StateT, ActionT]) -> None:
+    def __init__(
+        self,
+        model: WorldModel[ContextT, StateT, ActionT],
+        *,
+        chunk_size: Optional[int] = None,
+    ) -> None:
         self.model = model
+        if chunk_size is not None and chunk_size <= 0:
+            raise ValueError("chunk_size must be greater than zero")
+        self.chunk_size = chunk_size
         self._context: object = _UNSET
         self._state: object = _UNSET
         self._active = False
@@ -53,12 +61,18 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
     def step(self, action: ActionT) -> SimulationStep[StateT]:
         self._ensure_open()
         prediction = self.model.sample_step(self.context, action)
+        prediction.validate(chunk_size=self.chunk_size)
         self._context = prediction.context
         self._state = prediction.state
         info = dict(prediction.info)
         if prediction.frames is not None:
             info["frames"] = prediction.frames
-        return SimulationStep(prediction.state, info)
+        return SimulationStep(
+            state=prediction.state,
+            info=info,
+            action=action,
+            frames=prediction.frames,
+        )
 
     def render(self) -> Any:
         self._ensure_open()

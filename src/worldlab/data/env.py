@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
+from numbers import Real
 from typing import Any, Generic, Mapping, TypeVar
 
 
@@ -22,6 +24,12 @@ class StepResult(Generic[ObservationT]):
     terminated: bool
     truncated: bool
     info: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.reward, Real) or isinstance(self.reward, bool):
+            raise ValueError("reward must be a finite scalar")
+        if not math.isfinite(float(self.reward)):
+            raise ValueError("reward must be a finite scalar")
 
     @property
     def done(self) -> bool:

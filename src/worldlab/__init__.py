@@ -38,7 +38,8 @@ from .demo import (
     run_deterministic_demo,
 )
 from .envs import (
-    ChunkGoalTask,
+    ExampleEnvironment,
+    ExampleTask,
     GoalTask,
     SimulatorEnvironment,
     TimeLimitWrapper,
@@ -112,7 +113,8 @@ __all__ = [
     "WorldModelStepResult",
     "WorldModelSimulator",
     "GoalTask",
-    "ChunkGoalTask",
+    "ExampleEnvironment",
+    "ExampleTask",
     "build_demo",
     "build_configured_demo",
     "make_counter_environment",

@@ -51,6 +51,7 @@ def test_configured_example_closed_loop_preserves_chunk_outputs() -> None:
         frames = event.info["frames"]
         assert isinstance(frames, np.ndarray)
         assert frames.shape == (2, 3, 3, 32, 32)
+        assert event.info["action"].shape == (2, 16)
     assert trace.diagnose().healthy is True
 
 

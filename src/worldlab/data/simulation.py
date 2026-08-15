@@ -17,5 +17,14 @@ class SimulationReset(Generic[StateT]):
 
 @dataclass(frozen=True)
 class SimulationStep(Generic[StateT]):
+    """Simulator-facing transition before Task reward interpretation.
+
+    ``action`` records the action consumed by the simulator for diagnostics;
+    ``frames`` and ``state`` are model outputs. Reward is intentionally absent:
+    the Task produces the canonical environment reward.
+    """
+
     state: StateT
     info: Mapping[str, Any] = field(default_factory=dict)
+    action: Any = None
+    frames: Any = None
