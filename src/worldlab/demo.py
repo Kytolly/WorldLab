@@ -2,14 +2,31 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any, Optional, Tuple
 
 from worldlab.agents import PolicyAgent
 from worldlab.core import Agent, Environment, Policy
-from worldlab.data import EpisodeResult
+from worldlab.data import EpisodeResult, Transition
 from worldlab.envs import make_counter_environment, make_random_frame_environment
 from worldlab.policies import ConstantPolicy, RandomPolicy
-from worldlab.runtime import EnvironmentLoop, LoopConfig, TraceSink
+from worldlab.runtime import EnvironmentLoop, LoopCallback, LoopConfig, TraceSink
+
+
+class _DemoStepDelay(LoopCallback[Any, int]):
+    """Keep the built-in dashboard demo observable between transitions."""
+
+    def __init__(self, delay_s: float) -> None:
+        self.delay_s = delay_s
+
+    def on_step(
+        self,
+        episode_index: int,
+        step_index: int,
+        transition: Transition[Any, int],
+    ) -> None:
+        del episode_index, step_index, transition
+        time.sleep(self.delay_s)
 
 
 def build_demo(
@@ -51,7 +68,10 @@ def run_demo(
     seed: Optional[int] = 0,
     random_policy: bool = False,
     trace: Optional[TraceSink] = None,
+    step_delay: float = 0.0,
 ) -> EpisodeResult[Any]:
+    if step_delay < 0.0:
+        raise ValueError("step_delay must be non-negative")
     env, agent = build_demo(
         model=model,
         goal=goal,
@@ -59,10 +79,12 @@ def run_demo(
         max_episode_steps=max_episode_steps,
         random_policy=random_policy,
     )
+    callbacks = (_DemoStepDelay(step_delay),) if step_delay > 0.0 else ()
     with EnvironmentLoop(
         env,
         agent,
         config=LoopConfig(training=False, deterministic=not random_policy),
+        callbacks=callbacks,
         trace=trace,
     ) as loop:
         return loop.run_episode(seed=seed)

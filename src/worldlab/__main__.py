@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import time
 
 from .demo import run_demo
-from .runtime import TraceRecorder
+from .runtime import DashboardServer, TraceRecorder
 
 
 def main() -> int:
@@ -21,9 +22,43 @@ def main() -> int:
         action="store_true",
         help="print the closed-loop runtime timeline and diagnosis",
     )
+    parser.add_argument(
+        "--dashboard",
+        action="store_true",
+        help="serve the read-only runtime dashboard while the demo is observable",
+    )
+    parser.add_argument("--dashboard-port", type=int, default=8765)
+    parser.add_argument(
+        "--dashboard-step-delay",
+        type=float,
+        default=0.6,
+        help="seconds between demo transitions while dashboard is enabled",
+    )
+    parser.add_argument(
+        "--dashboard-seconds",
+        type=float,
+        default=30.0,
+        help="seconds to keep the dashboard alive after the demo (0 = no wait)",
+    )
     args = parser.parse_args()
 
-    trace = TraceRecorder() if args.trace else None
+    if args.dashboard_seconds < 0.0:
+        parser.error("--dashboard-seconds must be non-negative")
+    if args.dashboard_step_delay < 0.0:
+        parser.error("--dashboard-step-delay must be non-negative")
+
+    trace = TraceRecorder(max_events=4096) if args.dashboard else None
+    if args.trace and trace is None:
+        trace = TraceRecorder()
+    dashboard = (
+        DashboardServer(trace, port=args.dashboard_port)
+        if trace is not None and args.dashboard
+        else None
+    )
+    if dashboard is not None:
+        dashboard.start()
+        print(f"WorldLab dashboard: {dashboard.url}", flush=True)
+
     try:
         result = run_demo(
             model=args.model,
@@ -33,20 +68,33 @@ def main() -> int:
             seed=args.seed,
             random_policy=args.random_policy,
             trace=trace,
+            step_delay=args.dashboard_step_delay if args.dashboard else 0.0,
         )
     except Exception:
+        if dashboard is not None:
+            dashboard.stop()
         if trace is not None:
             print("closed_loop_trace")
             print(trace.format_timeline())
         raise
+    finally:
+        if dashboard is not None and args.dashboard_seconds == 0.0:
+            dashboard.stop()
+
     print("WorldLab demo")
     print(f"total_reward={result.total_reward}")
     print(f"length={result.length}")
     print(f"terminated={result.terminated}")
     print(f"truncated={result.truncated}")
-    if trace is not None:
+    if trace is not None and args.trace:
         print("closed_loop_trace")
         print(trace.format_timeline())
+    if dashboard is not None and args.dashboard_seconds > 0.0:
+        print(f"Dashboard remains available for {args.dashboard_seconds:.1f}s")
+        try:
+            time.sleep(args.dashboard_seconds)
+        finally:
+            dashboard.stop()
     return 0
 
 

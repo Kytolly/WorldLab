@@ -38,7 +38,15 @@ from .envs import (
     make_random_frame_environment,
 )
 from .policies import ConstantPolicy
-from .runtime import EventBuffer, EnvironmentLoop, LoopCallback, LoopConfig, TraceRecorder, TraceSink
+from .runtime import (
+    DashboardServer,
+    EventBuffer,
+    EnvironmentLoop,
+    LoopCallback,
+    LoopConfig,
+    TraceRecorder,
+    TraceSink,
+)
 from .simulators import CounterWorldModel, Frame, RandomFrameWorldModel, WorldModelSimulator
 
 __all__ = [
@@ -50,6 +58,7 @@ __all__ = [
     "Environment",
     "EnvironmentLoop",
     "EnvironmentStepped",
+    "DashboardServer",
     "EpisodeEnded",
     "EpisodeResult",
     "EpisodeStarted",
