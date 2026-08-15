@@ -1,2 +1,1 @@
 # WorldLab
-World Model Project
