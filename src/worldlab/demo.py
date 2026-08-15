@@ -9,7 +9,7 @@ from worldlab.core import Agent, Environment, Policy
 from worldlab.data import EpisodeResult
 from worldlab.envs import make_counter_environment, make_random_frame_environment
 from worldlab.policies import ConstantPolicy, RandomPolicy
-from worldlab.runtime import EnvironmentLoop, LoopConfig
+from worldlab.runtime import EnvironmentLoop, LoopConfig, TraceSink
 
 
 def build_demo(
@@ -50,6 +50,7 @@ def run_demo(
     max_episode_steps: Optional[int] = None,
     seed: Optional[int] = 0,
     random_policy: bool = False,
+    trace: Optional[TraceSink] = None,
 ) -> EpisodeResult[Any]:
     env, agent = build_demo(
         model=model,
@@ -62,5 +63,6 @@ def run_demo(
         env,
         agent,
         config=LoopConfig(training=False, deterministic=not random_policy),
+        trace=trace,
     ) as loop:
         return loop.run_episode(seed=seed)
