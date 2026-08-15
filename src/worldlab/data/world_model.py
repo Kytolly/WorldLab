@@ -1,4 +1,4 @@
-"""Context and prediction values exchanged with a WorldModel."""
+"""Data contracts exchanged with a WorldModel."""
 
 from __future__ import annotations
 
@@ -20,9 +20,14 @@ class WorldModelContext(Generic[ContextT, StateT]):
 
 
 @dataclass(frozen=True)
-class WorldModelPrediction(Generic[ContextT, StateT]):
-    """One stochastic or deterministic model transition."""
+class WorldModelStepResult(Generic[ContextT, StateT]):
+    """One model transition or action-chunk prediction.
+
+    State may be a chunk-level sequence with the same leading length as
+    frames. Frames are optional so scalar toy models remain valid.
+    """
 
     context: ContextT
     state: StateT
+    frames: Any = None
     info: Mapping[str, Any] = field(default_factory=dict)

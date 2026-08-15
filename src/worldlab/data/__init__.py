@@ -20,7 +20,7 @@ from .runtime import (
 )
 from .simulation import SimulationReset, SimulationStep
 from .trajectory import Trajectory
-from .world_model import WorldModelContext, WorldModelPrediction
+from .world_model import WorldModelContext, WorldModelStepResult
 
 __all__ = [
     "EpisodeResult",
@@ -45,5 +45,5 @@ __all__ = [
     "TransitionCommitted",
     "TransitionBatch",
     "WorldModelContext",
-    "WorldModelPrediction",
+    "WorldModelStepResult",
 ]

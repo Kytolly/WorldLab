@@ -19,7 +19,7 @@ from worldlab import (
     Transition,
     WorldModel,
     WorldModelContext,
-    WorldModelPrediction,
+    WorldModelStepResult,
     WorldModelSimulator,
 )
 from worldlab.agents import PolicyAgent
@@ -54,9 +54,9 @@ class CounterWorldModel(WorldModel[int, int, int]):
         state = int((options or {}).get("start", 0))
         return WorldModelContext(context=state, state=state)
 
-    def sample_step(self, context: int, action: int) -> WorldModelPrediction[int, int]:
+    def sample_step(self, context: int, action: int) -> WorldModelStepResult[int, int]:
         state = context + action
-        return WorldModelPrediction(context=state, state=state)
+        return WorldModelStepResult(context=state, state=state)
 
 
 class GoalTask(Task[int, int, int]):

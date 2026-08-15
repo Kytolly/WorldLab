@@ -1,11 +1,12 @@
-"""A deterministic toy world model used by ``python -m worldlab``."""
+"""Deterministic counter World Model used by the smoke demo."""
 
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional
 
-from worldlab.core import WorldModel
-from worldlab.data import WorldModelContext, WorldModelPrediction
+from worldlab.data import WorldModelContext, WorldModelStepResult
+
+from .base import WorldModel
 
 
 class CounterWorldModel(WorldModel[int, int, int]):
@@ -21,6 +22,6 @@ class CounterWorldModel(WorldModel[int, int, int]):
         state = int((options or {}).get("start", 0))
         return WorldModelContext(context=state, state=state)
 
-    def sample_step(self, context: int, action: int) -> WorldModelPrediction[int, int]:
+    def sample_step(self, context: int, action: int) -> WorldModelStepResult[int, int]:
         state = context + action
-        return WorldModelPrediction(context=state, state=state)
+        return WorldModelStepResult(context=state, state=state)

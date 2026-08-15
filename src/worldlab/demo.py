@@ -8,7 +8,7 @@ from typing import Any, Optional, Tuple
 from worldlab.agents import PolicyAgent
 from worldlab.core import Agent, Environment, Policy
 from worldlab.data import EpisodeResult, Transition
-from worldlab.envs import make_counter_environment, make_random_frame_environment
+from worldlab.envs import make_counter_environment
 from worldlab.policies import ConstantPolicy, RandomPolicy
 from worldlab.runtime import EnvironmentLoop, LoopCallback, LoopConfig, TraceSink
 
@@ -33,7 +33,6 @@ def build_demo(
     *,
     model: str = "counter",
     goal: int = 3,
-    frame_size: int = 8,
     max_episode_steps: Optional[int] = None,
     random_policy: bool = False,
 ) -> Tuple[Environment[Any, int], Agent[Any, int]]:
@@ -43,11 +42,6 @@ def build_demo(
         env: Environment[Any, int] = make_counter_environment(
             goal=goal,
             max_episode_steps=max_episode_steps,
-        )
-    elif model == "random-frame":
-        env = make_random_frame_environment(
-            frame_size=frame_size,
-            max_episode_steps=max_episode_steps or 3,
         )
     else:
         raise ValueError(f"unknown demo model: {model}")
@@ -63,7 +57,6 @@ def run_demo(
     *,
     model: str = "counter",
     goal: int = 3,
-    frame_size: int = 8,
     max_episode_steps: Optional[int] = None,
     seed: Optional[int] = 0,
     random_policy: bool = False,
@@ -75,7 +68,6 @@ def run_demo(
     env, agent = build_demo(
         model=model,
         goal=goal,
-        frame_size=frame_size,
         max_episode_steps=max_episode_steps,
         random_policy=random_policy,
     )

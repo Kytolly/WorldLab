@@ -12,7 +12,9 @@ license = { file = "LICENSE" }
 authors = [
     { name = "WorldLab contributors" },
 ]
-dependencies = []
+dependencies = [
+    "numpy>=1.24",
+]
 
 [project.optional-dependencies]
 dev = [

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Generic, Mapping, Optional, TypeVar, cast
 
-from worldlab.core import Simulator, WorldModel
+from worldlab.core import Simulator
 from worldlab.data import SimulationReset, SimulationStep
+from worldlab.world_models.base import WorldModel
 
 
 ContextT = TypeVar("ContextT")
@@ -54,7 +55,10 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
         prediction = self.model.sample_step(self.context, action)
         self._context = prediction.context
         self._state = prediction.state
-        return SimulationStep(prediction.state, prediction.info)
+        info = dict(prediction.info)
+        if prediction.frames is not None:
+            info["frames"] = prediction.frames
+        return SimulationStep(prediction.state, info)
 
     def render(self) -> Any:
         self._ensure_open()

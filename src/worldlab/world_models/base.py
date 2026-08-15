@@ -1,11 +1,11 @@
-"""High-level generative world-model contract."""
+"""Framework-neutral World Model inference contract."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Mapping, Optional, TypeVar
 
-from worldlab.data import WorldModelContext, WorldModelPrediction
+from worldlab.data import WorldModelContext, WorldModelStepResult
 
 
 ContextT = TypeVar("ContextT")
@@ -14,12 +14,7 @@ ActionT = TypeVar("ActionT")
 
 
 class WorldModel(ABC, Generic[ContextT, StateT, ActionT]):
-    """A model that samples the next world state from context and action.
-
-    The context may contain a history window, latent state, diffusion
-    conditioning features, cached encodings, or any other model-specific data.
-    Core code deliberately does not depend on a tensor or diffusion library.
-    """
+    """Model-side contract for state or action-conditioned chunk inference."""
 
     @abstractmethod
     def initialize(
@@ -35,18 +30,14 @@ class WorldModel(ABC, Generic[ContextT, StateT, ActionT]):
         self,
         context: ContextT,
         action: ActionT,
-    ) -> WorldModelPrediction[ContextT, StateT]:
-        """Sample one conditional transition from the model."""
-
+    ) -> WorldModelStepResult[ContextT, StateT]:
         raise NotImplementedError
 
     def rollout(
         self,
         context: ContextT,
         actions: list[ActionT],
-    ) -> list[WorldModelPrediction[ContextT, StateT]]:
-        """Optional multi-step rollout; concrete models may override it."""
-
+    ) -> list[WorldModelStepResult[ContextT, StateT]]:
         raise NotImplementedError("multi-step rollout is not implemented by this model")
 
     def render(self, context: ContextT, state: StateT) -> Any:

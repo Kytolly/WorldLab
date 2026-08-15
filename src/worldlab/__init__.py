@@ -3,7 +3,7 @@
 from .agents import PolicyAgent
 from .acceptance import AcceptanceReport, run_acceptance
 from .buffers import Buffer, ReplayBuffer
-from .core import Agent, DiscreteSpace, Environment, FrameSpace, Learner, Policy, Simulator, Space, Task, WorldModel
+from .core import Agent, DiscreteSpace, Environment, Learner, Policy, Simulator, Space, Task
 from .data import (
     EnvironmentStepped,
     EpisodeEnded,
@@ -27,16 +27,14 @@ from .data import (
     TransitionCommitted,
     TransitionBatch,
     WorldModelContext,
-    WorldModelPrediction,
+    WorldModelStepResult,
 )
 from .demo import build_demo, run_demo, run_deterministic_demo
 from .envs import (
     GoalTask,
-    RandomFrameTask,
     SimulatorEnvironment,
     TimeLimitWrapper,
     make_counter_environment,
-    make_random_frame_environment,
 )
 from .policies import ConstantPolicy
 from .runtime import (
@@ -48,7 +46,8 @@ from .runtime import (
     TraceRecorder,
     TraceSink,
 )
-from .simulators import CounterWorldModel, Frame, RandomFrameWorldModel, WorldModelSimulator
+from .world_models import CounterWorldModel, ExampleWorldModel, WorldModel
+from .simulators import WorldModelSimulator
 
 __all__ = [
     "Agent",
@@ -58,6 +57,7 @@ __all__ = [
     "CounterWorldModel",
     "DiscreteSpace",
     "Environment",
+    "ExampleWorldModel",
     "EnvironmentLoop",
     "EnvironmentStepped",
     "DashboardServer",
@@ -65,8 +65,6 @@ __all__ = [
     "EpisodeResult",
     "EpisodeStarted",
     "EventBuffer",
-    "Frame",
-    "FrameSpace",
     "Learner",
     "LoopCallback",
     "LoopConfig",
@@ -99,14 +97,11 @@ __all__ = [
     "TransitionBatch",
     "WorldModel",
     "WorldModelContext",
-    "WorldModelPrediction",
+    "WorldModelStepResult",
     "WorldModelSimulator",
     "GoalTask",
-    "RandomFrameTask",
-    "RandomFrameWorldModel",
     "build_demo",
     "make_counter_environment",
-    "make_random_frame_environment",
     "run_demo",
     "run_deterministic_demo",
     "run_acceptance",

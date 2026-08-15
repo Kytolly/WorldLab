@@ -25,17 +25,3 @@ def test_builtin_demo_function_returns_episode_result() -> None:
 
     assert result.total_reward == 2.0
     assert result.final_observation == 2
-
-
-def test_random_frame_world_model_runs_through_the_same_loop() -> None:
-    result = run_demo(
-        model="random-frame",
-        frame_size=4,
-        max_episode_steps=2,
-        seed=0,
-    )
-
-    assert len(result.final_observation) == 4
-    assert result.total_reward == 2.0
-    assert result.terminated is False
-    assert result.truncated is True
