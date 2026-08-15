@@ -18,6 +18,8 @@ from worldlab import (
     TimeLimitWrapper,
     Transition,
     WorldModel,
+    WorldModelContext,
+    WorldModelPrediction,
     WorldModelSimulator,
 )
 from worldlab.agents import PolicyAgent
@@ -41,18 +43,20 @@ class DiscreteSpace:
         self._random.seed(seed)
 
 
-class CounterWorldModel(WorldModel[int, int]):
-    def initial_state(
+class CounterWorldModel(WorldModel[int, int, int]):
+    def initialize(
         self,
         *,
         seed: Optional[int] = None,
         options: Optional[Mapping[str, Any]] = None,
-    ) -> SimulationReset[int]:
+    ) -> WorldModelContext[int, int]:
         del seed
-        return SimulationReset(int((options or {}).get("start", 0)))
+        state = int((options or {}).get("start", 0))
+        return WorldModelContext(context=state, state=state)
 
-    def predict(self, state: int, action: int) -> SimulationStep[int]:
-        return SimulationStep(state + action)
+    def sample_step(self, context: int, action: int) -> WorldModelPrediction[int, int]:
+        state = context + action
+        return WorldModelPrediction(context=state, state=state)
 
 
 class GoalTask(Task[int, int, int]):

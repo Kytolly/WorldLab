@@ -1,6 +1,15 @@
 """WorldLab simulator implementations."""
 
+from .random_frame import Frame, RandomFrameWorldModel
 from .toy import CounterWorldModel
-from .world_model import WorldModel, WorldModelSimulator
+from worldlab.core import WorldModel
 
-__all__ = ["CounterWorldModel", "WorldModel", "WorldModelSimulator"]
+from .world_model import WorldModelSimulator
+
+__all__ = [
+    "CounterWorldModel",
+    "Frame",
+    "RandomFrameWorldModel",
+    "WorldModel",
+    "WorldModelSimulator",
+]

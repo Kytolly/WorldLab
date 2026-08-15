@@ -2,7 +2,7 @@
 
 from .agents import PolicyAgent
 from .buffers import Buffer, ReplayBuffer
-from .core import Agent, DiscreteSpace, Environment, Learner, Policy, Simulator, Space, Task
+from .core import Agent, DiscreteSpace, Environment, FrameSpace, Learner, Policy, Simulator, Space, Task, WorldModel
 from .data import (
     EpisodeResult,
     PolicyOutput,
@@ -13,12 +13,21 @@ from .data import (
     Trajectory,
     Transition,
     TransitionBatch,
+    WorldModelContext,
+    WorldModelPrediction,
 )
 from .demo import build_demo, run_demo
-from .envs import GoalTask, SimulatorEnvironment, TimeLimitWrapper, make_counter_environment
+from .envs import (
+    GoalTask,
+    RandomFrameTask,
+    SimulatorEnvironment,
+    TimeLimitWrapper,
+    make_counter_environment,
+    make_random_frame_environment,
+)
 from .policies import ConstantPolicy
 from .runtime import EnvironmentLoop, LoopCallback, LoopConfig
-from .simulators import CounterWorldModel, WorldModel, WorldModelSimulator
+from .simulators import CounterWorldModel, Frame, RandomFrameWorldModel, WorldModelSimulator
 
 __all__ = [
     "Agent",
@@ -29,6 +38,8 @@ __all__ = [
     "Environment",
     "EnvironmentLoop",
     "EpisodeResult",
+    "Frame",
+    "FrameSpace",
     "Learner",
     "LoopCallback",
     "LoopConfig",
@@ -49,9 +60,14 @@ __all__ = [
     "Transition",
     "TransitionBatch",
     "WorldModel",
+    "WorldModelContext",
+    "WorldModelPrediction",
     "WorldModelSimulator",
     "GoalTask",
+    "RandomFrameTask",
+    "RandomFrameWorldModel",
     "build_demo",
     "make_counter_environment",
+    "make_random_frame_environment",
     "run_demo",
 ]

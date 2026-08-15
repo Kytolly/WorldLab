@@ -4,22 +4,23 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional
 
-from worldlab.data import SimulationReset, SimulationStep
+from worldlab.core import WorldModel
+from worldlab.data import WorldModelContext, WorldModelPrediction
 
-from .world_model import WorldModel
 
-
-class CounterWorldModel(WorldModel[int, int]):
+class CounterWorldModel(WorldModel[int, int, int]):
     """Advance an integer state by the selected integer action."""
 
-    def initial_state(
+    def initialize(
         self,
         *,
         seed: Optional[int] = None,
         options: Optional[Mapping[str, Any]] = None,
-    ) -> SimulationReset[int]:
+    ) -> WorldModelContext[int, int]:
         del seed
-        return SimulationReset(int((options or {}).get("start", 0)))
+        state = int((options or {}).get("start", 0))
+        return WorldModelContext(context=state, state=state)
 
-    def predict(self, state: int, action: int) -> SimulationStep[int]:
-        return SimulationStep(state + action)
+    def sample_step(self, context: int, action: int) -> WorldModelPrediction[int, int]:
+        state = context + action
+        return WorldModelPrediction(context=state, state=state)

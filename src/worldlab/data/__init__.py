@@ -6,6 +6,7 @@ from .interaction import EpisodeResult, Transition
 from .policy import PolicyOutput
 from .simulation import SimulationReset, SimulationStep
 from .trajectory import Trajectory
+from .world_model import WorldModelContext, WorldModelPrediction
 
 __all__ = [
     "EpisodeResult",
@@ -17,4 +18,6 @@ __all__ = [
     "Trajectory",
     "Transition",
     "TransitionBatch",
+    "WorldModelContext",
+    "WorldModelPrediction",
 ]

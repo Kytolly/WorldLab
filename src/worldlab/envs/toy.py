@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional
 
-from worldlab.core import DiscreteSpace, Environment, Task
+from worldlab.core import DiscreteSpace, Environment, FrameSpace, Task
 from worldlab.data import ResetResult, SimulationReset, SimulationStep, StepResult
-from worldlab.simulators import CounterWorldModel, WorldModelSimulator
+from worldlab.simulators import (
+    CounterWorldModel,
+    RandomFrameWorldModel,
+    WorldModelSimulator,
+)
 
 from .simulator_env import SimulatorEnvironment
 from .wrappers import TimeLimitWrapper
@@ -55,3 +59,44 @@ def make_counter_environment(
     if max_episode_steps is not None:
         env = TimeLimitWrapper(env, max_episode_steps)
     return env
+
+
+class RandomFrameTask(Task[tuple[int, ...], tuple[int, ...], int]):
+    """A never-terminating frame task intended for TimeLimitWrapper."""
+
+    def reset(
+        self,
+        simulation: SimulationReset[tuple[int, ...]],
+    ) -> ResetResult[tuple[int, ...]]:
+        return ResetResult(simulation.state, {"task": "random_frame"})
+
+    def step(
+        self,
+        previous_state: tuple[int, ...],
+        action: int,
+        simulation: SimulationStep[tuple[int, ...]],
+    ) -> StepResult[tuple[int, ...]]:
+        del previous_state, action
+        return StepResult(
+            observation=simulation.state,
+            reward=1.0,
+            terminated=False,
+            truncated=False,
+            info={"task": "random_frame", **simulation.info},
+        )
+
+
+def make_random_frame_environment(
+    *,
+    frame_size: int = 8,
+    max_episode_steps: int = 3,
+) -> Environment[tuple[int, ...], int]:
+    """Build an environment backed by the stochastic frame model."""
+
+    env: Environment[tuple[int, ...], int] = SimulatorEnvironment(
+        WorldModelSimulator(RandomFrameWorldModel(frame_size)),
+        RandomFrameTask(),
+        observation_space=FrameSpace(frame_size),
+        action_space=DiscreteSpace(2),
+    )
+    return TimeLimitWrapper(env, max_episode_steps)
