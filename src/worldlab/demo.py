@@ -88,3 +88,20 @@ def run_demo(
         trace=trace,
     ) as loop:
         return loop.run_episode(seed=seed)
+
+
+def run_deterministic_demo(
+    *,
+    goal: int = 3,
+    seed: int = 0,
+    trace: Optional[TraceSink] = None,
+) -> EpisodeResult[Any]:
+    """Run the stable counter demo used by automated acceptance checks."""
+
+    return run_demo(
+        model="counter",
+        goal=goal,
+        seed=seed,
+        random_policy=False,
+        trace=trace,
+    )

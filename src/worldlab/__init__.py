@@ -1,6 +1,7 @@
 """WorldLab's framework-neutral reinforcement-learning primitives."""
 
 from .agents import PolicyAgent
+from .acceptance import AcceptanceReport, run_acceptance
 from .buffers import Buffer, ReplayBuffer
 from .core import Agent, DiscreteSpace, Environment, FrameSpace, Learner, Policy, Simulator, Space, Task, WorldModel
 from .data import (
@@ -28,7 +29,7 @@ from .data import (
     WorldModelContext,
     WorldModelPrediction,
 )
-from .demo import build_demo, run_demo
+from .demo import build_demo, run_demo, run_deterministic_demo
 from .envs import (
     GoalTask,
     RandomFrameTask,
@@ -51,6 +52,7 @@ from .simulators import CounterWorldModel, Frame, RandomFrameWorldModel, WorldMo
 
 __all__ = [
     "Agent",
+    "AcceptanceReport",
     "Buffer",
     "ConstantPolicy",
     "CounterWorldModel",
@@ -106,4 +108,6 @@ __all__ = [
     "make_counter_environment",
     "make_random_frame_environment",
     "run_demo",
+    "run_deterministic_demo",
+    "run_acceptance",
 ]

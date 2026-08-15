@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import time
 
+from .acceptance import run_acceptance
 from .demo import run_demo
 from .runtime import DashboardServer, TraceRecorder
 
@@ -17,6 +18,11 @@ def main() -> int:
     parser.add_argument("--max-episode-steps", type=int, default=None)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--random-policy", action="store_true")
+    parser.add_argument(
+        "--acceptance",
+        action="store_true",
+        help="run deterministic end-to-end acceptance checks and exit",
+    )
     parser.add_argument(
         "--trace",
         action="store_true",
@@ -46,6 +52,14 @@ def main() -> int:
         parser.error("--dashboard-seconds must be non-negative")
     if args.dashboard_step_delay < 0.0:
         parser.error("--dashboard-step-delay must be non-negative")
+    if args.acceptance:
+        if args.dashboard:
+            parser.error("--acceptance cannot be combined with --dashboard")
+        if args.model != "counter" or args.random_policy:
+            parser.error("--acceptance requires the deterministic counter demo")
+        report = run_acceptance(goal=args.goal, seed=args.seed)
+        print(report.format())
+        return 0 if report.passed else 1
 
     trace = TraceRecorder(max_events=4096) if args.dashboard else None
     if args.trace and trace is None:
