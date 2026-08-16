@@ -20,12 +20,15 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "build>=1.2",
-    "mypy>=1.11",
+    "mypy>=1.11,<1.12",
     "pytest>=8.0",
     "twine>=5.1",
 ]
 ui = [
     "worldlab-ui-panel>=0.2.3,<0.3",
+]
+openpi = [
+    "worldlab-integrations-openpi>=0.2.3,<0.3",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,14 @@
+name: env_worldlab
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - pip
+  - pillow>=10
+  - pip:
+      - -e .[dev]
+      - mypy>=1.11,<1.12
+      - -e packages/worldlab-ui-panel
+      - -e packages/worldlab-integrations-openpi

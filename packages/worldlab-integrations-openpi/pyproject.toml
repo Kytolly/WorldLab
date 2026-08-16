@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldlab-integrations-openpi"
+version = "0.2.3"
+description = "OpenPI policy integration for WorldLab"
+requires-python = ">=3.10"
+dependencies = [
+    "worldlab>=0.2.3,<0.3",
+    "numpy>=1.24",
+    "openpi-client>=0.1",
+    "websockets>=14,<16",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["worldlab_openpi*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+worldlab_openpi = ["py.typed"]

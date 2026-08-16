@@ -1,0 +1,11 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/packages/worldlab-integrations-openpi/src",
+        "${workspaceFolder}/packages/worldlab-ui-panel/src",
+        "${workspaceFolder}/third-party/openpi/src",
+        "${workspaceFolder}/third-party/openpi/packages/openpi-client/src"
+    ]
+}
