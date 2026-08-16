@@ -6,6 +6,10 @@ import pytest
 from worldlab import (
     CounterWorldModel,
     ExampleEnvironment,
+    SIMULATION_CHUNK_INDEX,
+    SIMULATION_FRAMES,
+    SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_STATE,
     WorldModelStepResult,
     WorldModelSimulator,
     build_configured_demo,
@@ -52,6 +56,13 @@ def test_world_model_simulator_propagates_normalized_chunk_fields() -> None:
     assert step.state == 1
     assert step.action == 1
     assert step.frames is None
+    assert step.info[SIMULATION_CHUNK_INDEX] == 0
+    assert step.info[SIMULATION_MODEL_LATENCY_S] >= 0.0
+    assert step.info[SIMULATION_STATE] == 1
+    assert simulator.chunk_index == 1
+
+    simulator.reset(options={"start": 10})
+    assert simulator.chunk_index == 0
 
 
 def test_example_environment_keeps_model_and_task_boundaries_explicit() -> None:
@@ -69,3 +80,7 @@ def test_example_environment_keeps_model_and_task_boundaries_explicit() -> None:
     assert step.terminated is False
     assert step.info["action"].shape == (4, 16)
     assert step.info["frames"].shape == (4, 3, 3, 32, 32)
+    assert step.info[SIMULATION_CHUNK_INDEX] == 0
+    assert step.info[SIMULATION_MODEL_LATENCY_S] >= 0.0
+    assert step.info[SIMULATION_FRAMES].shape == (4, 3, 3, 32, 32)
+    assert step.info[SIMULATION_STATE].shape == (4, 16)

@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any, Generic, Mapping, Optional, TypeVar, cast
 
 from worldlab.core import Simulator
-from worldlab.data import SimulationReset, SimulationStep
+from worldlab.data import (
+    SIMULATION_CHUNK_INDEX,
+    SIMULATION_FRAMES,
+    SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_STATE,
+    SimulationReset,
+    SimulationStep,
+)
 from worldlab.world_models.base import WorldModel
 
 
@@ -32,6 +40,7 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
         self._state: object = _UNSET
         self._active = False
         self._closed = False
+        self._chunk_index = 0
 
     @property
     def context(self) -> ContextT:
@@ -45,6 +54,12 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
             raise RuntimeError("simulator has not been reset")
         return cast(StateT, self._state)
 
+    @property
+    def chunk_index(self) -> int:
+        """Index of the next chunk that will be sent to the model."""
+
+        return self._chunk_index
+
     def reset(
         self,
         *,
@@ -56,17 +71,26 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
         self._context = result.context
         self._state = result.state
         self._active = True
+        self._chunk_index = 0
         return SimulationReset(result.state, result.info)
 
     def step(self, action: ActionT) -> SimulationStep[StateT]:
         self._ensure_open()
+        chunk_index = self._chunk_index
+        started_at = time.perf_counter()
         prediction = self.model.sample_step(self.context, action)
+        model_latency_s = time.perf_counter() - started_at
         prediction.validate(chunk_size=self.chunk_size)
         self._context = prediction.context
         self._state = prediction.state
         info = dict(prediction.info)
+        info[SIMULATION_CHUNK_INDEX] = chunk_index
+        info[SIMULATION_MODEL_LATENCY_S] = model_latency_s
+        info[SIMULATION_STATE] = prediction.state
         if prediction.frames is not None:
             info["frames"] = prediction.frames
+            info[SIMULATION_FRAMES] = prediction.frames
+        self._chunk_index += 1
         return SimulationStep(
             state=prediction.state,
             info=info,

@@ -16,6 +16,7 @@ from worldlab import (
     RuntimePhase,
     RuntimeStatus,
     TraceRecorder,
+    TraceSource,
     Transition,
     TransitionCommitted,
     build_demo,
@@ -142,6 +143,7 @@ def test_trace_timeline_is_directly_readable() -> None:
 def test_event_buffer_keeps_a_live_snapshot_and_bounded_history() -> None:
     env, agent = build_demo(goal=2)
     buffer = EventBuffer(max_events=3)
+    assert isinstance(buffer, TraceSource)
 
     with EnvironmentLoop(env, agent, trace=buffer) as loop:
         result = loop.run_episode(seed=0)

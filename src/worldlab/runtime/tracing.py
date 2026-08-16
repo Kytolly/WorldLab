@@ -32,6 +32,26 @@ class TraceSink(Protocol):
         ...
 
 
+@runtime_checkable
+class TraceSource(Protocol):
+    """Read-only view of runtime events for dashboards and transports.
+
+    A source deliberately exposes no loop-control methods.  In-memory buffers,
+    file-backed readers, and remote event clients can all implement this port.
+    """
+
+    @property
+    def events(self) -> Tuple[RuntimeEvent, ...]:
+        ...
+
+    @property
+    def snapshot(self) -> RuntimeSnapshot:
+        ...
+
+    def since(self, sequence: int = 0) -> Tuple[RuntimeEvent, ...]:
+        ...
+
+
 class EventBuffer:
     """Thread-safe bounded event history with a live runtime snapshot."""
 

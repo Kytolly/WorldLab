@@ -20,7 +20,7 @@ from worldlab.data import (
     TransitionCommitted,
 )
 
-from .tracing import EventBuffer
+from .tracing import TraceSource
 
 
 class DashboardServer:
@@ -28,7 +28,7 @@ class DashboardServer:
 
     def __init__(
         self,
-        source: EventBuffer,
+        source: TraceSource,
         *,
         host: str = "127.0.0.1",
         port: int = 0,
@@ -84,7 +84,7 @@ class DashboardServer:
         self.stop()
 
 
-def _make_handler(source: EventBuffer, poll_interval_s: float) -> type[BaseHTTPRequestHandler]:
+def _make_handler(source: TraceSource, poll_interval_s: float) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, format: str, *args: object) -> None:
             del format, args
@@ -131,7 +131,7 @@ def _make_handler(source: EventBuffer, poll_interval_s: float) -> type[BaseHTTPR
     return Handler
 
 
-def _events_payload(source: EventBuffer, query: Mapping[str, Sequence[str]]) -> dict[str, Any]:
+def _events_payload(source: TraceSource, query: Mapping[str, Sequence[str]]) -> dict[str, Any]:
     after = _query_int(query, "after", 0)
     limit = min(max(_query_int(query, "limit", 100), 1), 500)
     events = source.since(after) if after > 0 else source.events

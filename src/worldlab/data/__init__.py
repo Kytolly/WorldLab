@@ -18,7 +18,14 @@ from .runtime import (
     TraceDiagnosis,
     TransitionCommitted,
 )
-from .simulation import SimulationReset, SimulationStep
+from .simulation import (
+    SIMULATION_CHUNK_INDEX,
+    SIMULATION_FRAMES,
+    SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_STATE,
+    SimulationReset,
+    SimulationStep,
+)
 from .trajectory import Trajectory
 from .world_model import WorldModelContext, WorldModelStepResult
 
@@ -38,6 +45,10 @@ __all__ = [
     "RuntimeStatus",
     "SimulationReset",
     "SimulationStep",
+    "SIMULATION_CHUNK_INDEX",
+    "SIMULATION_FRAMES",
+    "SIMULATION_MODEL_LATENCY_S",
+    "SIMULATION_STATE",
     "StepResult",
     "Trajectory",
     "TraceDiagnosis",

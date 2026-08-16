@@ -19,6 +19,10 @@ from .data import (
     RuntimePhase,
     RuntimeSnapshot,
     RuntimeStatus,
+    SIMULATION_CHUNK_INDEX,
+    SIMULATION_FRAMES,
+    SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_STATE,
     SimulationReset,
     SimulationStep,
     StepResult,
@@ -55,6 +59,7 @@ from .runtime import (
     LoopConfig,
     TraceRecorder,
     TraceSink,
+    TraceSource,
 )
 from .world_models import CounterWorldModel, ExampleWorldModel, WorldModel
 from .simulators import WorldModelSimulator
@@ -93,6 +98,10 @@ __all__ = [
     "RuntimePhase",
     "RuntimeSnapshot",
     "RuntimeStatus",
+    "SIMULATION_CHUNK_INDEX",
+    "SIMULATION_FRAMES",
+    "SIMULATION_MODEL_LATENCY_S",
+    "SIMULATION_STATE",
     "SimulationReset",
     "SimulationStep",
     "Simulator",
@@ -105,6 +114,7 @@ __all__ = [
     "TraceDiagnosis",
     "TraceRecorder",
     "TraceSink",
+    "TraceSource",
     "Transition",
     "TransitionCommitted",
     "TransitionBatch",
