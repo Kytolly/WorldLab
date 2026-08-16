@@ -1,0 +1,8 @@
+.git
+**/.git
+.openpi_cache
+model_zoo
+dataset
+output
+__pycache__
+*.pyc

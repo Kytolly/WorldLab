@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from worldlab_openpi import (
     ActionLayout,
@@ -42,6 +43,11 @@ def test_policy_to_world_model_layout_conversion() -> None:
     assert world_model[0, 7] == policy[0, 14]
     assert np.array_equal(world_model[0, 8:15], policy[0, 7:14])
     assert world_model[0, 15] == policy[0, 15]
+
+
+def test_policy_requires_websocket_url() -> None:
+    with pytest.raises(ValueError, match="WebSocket URL"):
+        OpenPIPolicy("http://127.0.0.1:8000")
 
 
 def test_fake_server_validates_network_payload_shape_and_layout() -> None:

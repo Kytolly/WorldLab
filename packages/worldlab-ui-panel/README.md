@@ -23,11 +23,15 @@ For an in-process application, create the view from an existing event source:
 
 ```python
 from worldlab import EventBuffer
-from worldlab_ui_panel import create_panel
+import panel as pn
+
+from worldlab_ui_panel import create_panel_app
 
 source = EventBuffer()
-view = create_panel(source)
+pn.serve(create_panel_app(source))
 ```
 
-Pass `view` to `panel.serve`. A future transport reader can implement the same
-`TraceSource` protocol without changing the UI.
+The application factory creates the dashboard after each browser session is
+available, so its periodic refresh callback updates the correct document. A
+future transport reader can implement the same `TraceSource` protocol without
+changing the UI.

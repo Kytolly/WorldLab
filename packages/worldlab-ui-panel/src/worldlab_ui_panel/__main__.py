@@ -9,7 +9,7 @@ import panel as pn
 
 from worldlab import EventBuffer, load_config, run_configured_demo
 
-from .app import PanelDashboard
+from .app import create_panel_app
 
 
 def main() -> int:
@@ -41,10 +41,9 @@ def main() -> int:
         run_configured_demo(config, trace=source)
 
     threading.Thread(target=run, name="worldlab-panel-demo", daemon=True).start()
-    dashboard = PanelDashboard(source, poll_interval_ms=args.poll_interval_ms)
     print(f"WorldLab Panel: http://{args.host}:{args.port}", flush=True)
     pn.serve(
-        dashboard.panel(),
+        create_panel_app(source, poll_interval_ms=args.poll_interval_ms),
         address=args.host,
         port=args.port,
         websocket_origin=[f"{args.host}:{args.port}", f"localhost:{args.port}"],

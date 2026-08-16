@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from html import escape
 from io import BytesIO
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 import numpy as np
 import panel as pn
@@ -252,6 +252,24 @@ class PanelDashboard:
 
 
 def create_panel(source: TraceSource, *, poll_interval_ms: int = 500) -> pn.Column:
-    """Create a live Panel view for ``source``."""
+    """Create a live Panel view inside the current Panel session."""
 
     return PanelDashboard(source, poll_interval_ms=poll_interval_ms).panel()
+
+
+def create_panel_app(
+    source: TraceSource,
+    *,
+    poll_interval_ms: int = 500,
+) -> Callable[[], pn.Column]:
+    """Return a session factory suitable for :func:`panel.serve`.
+
+    Panel periodic callbacks belong to a browser session document.  Delaying
+    dashboard construction until Panel opens that document keeps live refresh
+    attached to the page instead of to the process-global bootstrap document.
+    """
+
+    def app() -> pn.Column:
+        return create_panel(source, poll_interval_ms=poll_interval_ms)
+
+    return app

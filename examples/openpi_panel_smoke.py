@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import argparse
 import threading
+import time
+import traceback
 from typing import Any, Mapping, Optional
+from urllib.parse import urlsplit
 
 import numpy as np
 import panel as pn
@@ -25,7 +28,8 @@ from worldlab import (
     load_config,
 )
 from worldlab.data import PolicyOutput
-from worldlab_ui_panel import PanelDashboard
+from worldlab.data.runtime import RuntimeErrorEvent, RuntimePhase
+from worldlab_ui_panel import create_panel_app
 from worldlab_openpi import OpenPIObservation, OpenPIPolicy
 
 
@@ -87,12 +91,20 @@ def main() -> int:
     parser.add_argument("--goal", type=int, default=6)
     parser.add_argument("--chunk-size", type=int, default=4)
     parser.add_argument("--step-delay", type=float, default=0.5)
+    parser.add_argument(
+        "--connect-timeout",
+        type=float,
+        default=60.0,
+        help="seconds to wait for the OpenPI WebSocket port before reporting failure",
+    )
     parser.add_argument("--show", action="store_true")
     args = parser.parse_args()
     if args.port <= 0 or args.port > 65535:
         parser.error("--port must be between 1 and 65535")
     if args.goal <= 0 or args.chunk_size <= 0:
         parser.error("goal and chunk-size must be greater than zero")
+    if args.connect_timeout <= 0:
+        parser.error("--connect-timeout must be greater than zero")
 
     config = load_config(
         overrides=[
@@ -106,13 +118,71 @@ def main() -> int:
     model_frame_shape = tuple(int(value) for value in environment.observation_space.shapes[0])
     source = EventBuffer(max_events=max(256, args.goal * 8))
 
-    openpi = OpenPIPolicy(args.policy_url, action_horizon=args.chunk_size)
-    agent = PolicyAgent(
-        _ExampleOpenPIAdapter(openpi, model_frame_shape, "synthetic OpenPI task")
-    )
     loop_config = LoopConfig(training=False, deterministic=True, validate_spaces=True)
 
+    def connect_policy(url: str, timeout_s: float) -> OpenPIPolicy:
+        parsed = urlsplit(url)
+        if parsed.scheme not in {"ws", "wss"} or not parsed.hostname:
+            raise ValueError(
+                "--policy-url must use ws:// or wss://, for example "
+                "ws://127.0.0.1:8000; HTTP requests produce OpenPI's 426 response"
+            )
+        result: list[OpenPIPolicy] = []
+        errors: list[Exception] = []
+
+        def create_client() -> None:
+            try:
+                result.append(OpenPIPolicy(url, action_horizon=args.chunk_size))
+            except Exception as error:
+                errors.append(error)
+
+        # The official client retries connection-refused forever. Keep that
+        # wait off Panel's event loop, but let the UI report a bounded failure.
+        connector = threading.Thread(
+            target=create_client,
+            name="worldlab-openpi-connect",
+            daemon=True,
+        )
+        connector.start()
+        connector.join(timeout_s)
+        if connector.is_alive():
+            raise TimeoutError(
+                f"OpenPI WebSocket handshake for {url} did not complete "
+                f"within {timeout_s:.1f}s"
+            )
+        if errors:
+            raise errors[0]
+        if not result:
+            raise RuntimeError("OpenPI client exited without a policy instance")
+        return result[0]
+
     def run_loop() -> None:
+        try:
+            print(f"Waiting for OpenPI WebSocket: {args.policy_url}", flush=True)
+            openpi = connect_policy(args.policy_url, args.connect_timeout)
+            agent = PolicyAgent(
+                _ExampleOpenPIAdapter(openpi, model_frame_shape, "synthetic OpenPI task")
+            )
+            print("OpenPI handshake completed; starting rollout", flush=True)
+        except Exception as error:
+            print(f"OpenPI connection failed: {error}", flush=True)
+            traceback.print_exc()
+            source.record(
+                RuntimeErrorEvent(
+                    sequence=1,
+                    timestamp_s=time.time(),
+                    monotonic_s=time.perf_counter(),
+                    episode_index=0,
+                    step_index=0,
+                    duration_s=0.0,
+                    phase=RuntimePhase.AGENT_RESET,
+                    error_type=type(error).__name__,
+                    message=str(error),
+                    traceback=traceback.format_exc(),
+                )
+            )
+            environment.close()
+            return
         try:
             with EnvironmentLoop(
                 environment,
@@ -125,11 +195,10 @@ def main() -> int:
             environment.close()
 
     threading.Thread(target=run_loop, name="worldlab-openpi-smoke", daemon=True).start()
-    dashboard = PanelDashboard(source, poll_interval_ms=200)
     print(f"OpenPI service: {args.policy_url}", flush=True)
     print(f"WorldLab Panel: http://{args.host}:{args.port}", flush=True)
     pn.serve(
-        dashboard.panel(),
+        create_panel_app(source, poll_interval_ms=200),
         address=args.host,
         port=args.port,
         websocket_origin=[f"{args.host}:{args.port}", f"localhost:{args.port}"],

@@ -1,0 +1,36 @@
+services:
+  openpi:
+    image: worldlab-openpi:pi05
+    build:
+      context: .
+      dockerfile: docker/openpi.Dockerfile
+    init: true
+    ports:
+      - "${OPENPI_PORT:-9000}:8000"
+    volumes:
+      # The adapter and checkpoint remain outside the image and are not copied
+      # into Git or into the OpenPI dependency layer.
+      - ./third-party/openpi:/app:ro
+      - .:/worldlab:ro
+      - ${OPENPI_CACHE_DIR:-./.openpi_cache}:/openpi_assets
+    environment:
+      OPENPI_DATA_HOME: /openpi_assets
+      PYTHONPATH: /worldlab/src:/worldlab/packages/worldlab-integrations-openpi/src:/app/src:/app/packages/openpi-client/src
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+    command:
+      - /.venv/bin/python
+      - -m
+      - worldlab_openpi.openpi_serving.serve_pi05
+      - --checkpoint
+      - ${OPENPI_CHECKPOINT:-/worldlab/model_zoo/agibot-world/Genie-Envisioner-Sim-v2.0/checkpoints/pi05_gesim_g01op_test}
+      - --asset-id
+      - ${ASSET_ID:-gesim}
+      - --port
+      - "8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

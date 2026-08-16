@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import Any, Mapping, Optional
+from urllib.parse import urlsplit
 
 import numpy as np
 from numpy.typing import NDArray
@@ -41,6 +42,12 @@ class OpenPIPolicy(Policy[OpenPIObservation, NDArray[np.float32]]):
     ) -> None:
         if action_horizon is not None and action_horizon <= 0:
             raise ValueError("action_horizon must be greater than zero")
+        parsed_url = urlsplit(url)
+        if parsed_url.scheme not in {"ws", "wss"} or not parsed_url.hostname:
+            raise ValueError(
+                "OpenPI policy URL must be a WebSocket URL such as "
+                "ws://127.0.0.1:8000; the OpenPI port does not serve normal HTTP"
+            )
         try:
             from openpi_client.websocket_client_policy import (  # type: ignore[import-untyped]
                 WebsocketClientPolicy,
