@@ -44,7 +44,7 @@ git checkout dev
 git submodule update --init --recursive
 ```
 
-确认当前分支包含 v0.2.5 或之后的 OpenPI/UI 实现：
+确认当前分支包含 v0.2.5 的 OpenPI/UI 实现：
 
 ```bash
 git log -1 --oneline
@@ -75,13 +75,18 @@ conda activate env_worldlab
 python -m pip install --no-deps -e third-party/openpi
 ```
 
-检查基础导入和测试：
+检查基础导入、自动化验收和测试：
 
 ```bash
 python -c "import worldlab, openpi, worldlab_openpi; print('imports ok')"
-pytest -q tests packages/worldlab-integrations-openpi/tests
+python -m worldlab --acceptance --goal 3 --seed 0
+pytest -q
 python -m mypy --config-file pyproject.toml
 ```
+
+`python -m worldlab --acceptance` 是不依赖 GPU、权重或网络的确定性发布验收；
+`pytest -q` 会同时收集核心、Panel 和 OpenPI fake-server 协议测试。测试中的
+fake OpenPI 服务只属于测试模块，不会被安装为运行时服务。
 
 ### 3. 准备 OpenPI serving 环境
 

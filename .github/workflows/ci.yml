@@ -40,16 +40,22 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install package and development tools
-        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m pip install -e packages/worldlab-ui-panel -e packages/worldlab-integrations-openpi
 
       - name: Run unit tests
         run: python -m pytest -q
+
+      - name: Run deterministic release acceptance
+        run: python -m worldlab --acceptance --goal 3 --seed 0
 
       - name: Run strict type checks
         run: python -m mypy --config-file pyproject.toml
 
       - name: Compile Python sources
-        run: python -m compileall -q src tests
+        run: python -m compileall -q src tests packages/worldlab-ui-panel/src packages/worldlab-integrations-openpi/src
 
   package:
     name: Build distributions
@@ -70,8 +76,11 @@ jobs:
       - name: Install build tools
         run: python -m pip install --upgrade pip && python -m pip install ".[dev]"
 
-      - name: Build wheel and source distribution
-        run: python -m build
+      - name: Build all wheel and source distributions
+        run: |
+          python -m build
+          python -m build packages/worldlab-ui-panel --outdir dist
+          python -m build packages/worldlab-integrations-openpi --outdir dist
 
       - name: Validate distribution metadata
         run: python -m twine check dist/*
