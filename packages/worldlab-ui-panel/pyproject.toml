@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldlab-ui-panel"
+version = "0.2.3"
+description = "Panel dashboard for observing WorldLab runtime events"
+requires-python = ">=3.10"
+dependencies = [
+    "worldlab>=0.2.3,<0.3",
+    "panel>=1.5,<2",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+worldlab-panel = "worldlab_ui_panel.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["worldlab_ui_panel*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+worldlab_ui_panel = ["py.typed"]
