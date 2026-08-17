@@ -7,6 +7,7 @@ from .config import ConfigError, config_to_dict, load_config
 from .core import (
     Agent,
     ArraySpace,
+    DictSpace,
     DiscreteSpace,
     Environment,
     Learner,
@@ -17,6 +18,7 @@ from .core import (
     Space,
     Task,
     TerminationProvider,
+    TupleSpace,
 )
 from .data import (
     EnvironmentStepped,
@@ -94,6 +96,7 @@ __all__ = [
     "ConstantPolicy",
     "CounterWorldModel",
     "DiscreteSpace",
+    "DictSpace",
     "Environment",
     "ExampleWorldModel",
     "EnvironmentLoop",
@@ -155,6 +158,7 @@ __all__ = [
     "ExampleEnvironment",
     "ExampleTask",
     "TerminationProvider",
+    "TupleSpace",
     "build_demo",
     "build_configured_demo",
     "make_counter_environment",

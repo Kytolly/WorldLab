@@ -143,16 +143,15 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
             raise ValueError(
                 f"action_chunk must have shape (L, {self.state_dim}), got {actions.shape}"
             )
-        if actions.shape[0] <= 0 or actions.shape[0] > self.chunk_size:
+        if actions.shape[0] != self.chunk_size:
             raise ValueError(
-                "action_chunk length must be between 1 and chunk_size "
+                "action_chunk length must equal chunk_size "
                 f"({self.chunk_size}), got {actions.shape[0]}"
             )
         if not np.isfinite(actions).all():
             raise ValueError("action_chunk must contain only finite values")
 
-        padded_actions = self._pad_actions(actions)
-        action_signal = np.tanh(padded_actions.mean(axis=1)).astype(np.float32)
+        action_signal = np.tanh(actions.mean(axis=1)).astype(np.float32)
         ramp = np.linspace(0.0, 0.25, self.chunk_size, dtype=np.float32)
         noise = self._rng.normal(
             loc=0.0,
@@ -170,7 +169,7 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
         self._chunk_index += 1
         return WorldModelStepResult(
             context=self._chunk_index,
-            state=padded_actions.copy(),
+            state=actions.copy(),
             output=frames,
             info={
                 "chunk_index": self._chunk_index,
@@ -259,13 +258,3 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
             raise RuntimeError("initialize options require first_frame")
         if self._trajectory is None or self._c2w is None:
             raise RuntimeError("initialize options require trajectory and c2w")
-
-    def _pad_actions(self, actions: Array) -> Array:
-        if actions.shape[0] == self.chunk_size:
-            return actions.copy()
-        padding = np.repeat(
-            actions[-1:],
-            self.chunk_size - actions.shape[0],
-            axis=0,
-        )
-        return np.concatenate((actions, padding), axis=0)

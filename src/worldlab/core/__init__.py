@@ -7,12 +7,13 @@ from .learner import Learner
 from .policy import Policy
 from .reward import RewardProvider
 from .simulator import Simulator
-from .spaces import ArraySpace, DiscreteSpace
+from .spaces import ArraySpace, DictSpace, DiscreteSpace, TupleSpace
 from .termination import TerminationProvider
 
 __all__ = [
     "Agent",
     "ArraySpace",
+    "DictSpace",
     "DiscreteSpace",
     "Environment",
     "Learner",
@@ -23,4 +24,5 @@ __all__ = [
     "Space",
     "Task",
     "TerminationProvider",
+    "TupleSpace",
 ]

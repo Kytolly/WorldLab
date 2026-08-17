@@ -53,7 +53,7 @@ def test_example_world_model_uses_generic_world_model_contract() -> None:
 
     assert isinstance(model, WorldModel)
     assert model.frame_shape == (3, 3, 6, 8)
-    actions = np.ones((2, 16), dtype=np.float32)
+    actions = np.ones((4, 16), dtype=np.float32)
     result = _run(model, actions)
 
     assert result.output.shape == (4, 3, 3, 6, 8)
@@ -61,8 +61,7 @@ def test_example_world_model_uses_generic_world_model_contract() -> None:
     assert np.all((result.output >= 0.0) & (result.output <= 1.0))
     assert result.state is not None
     assert result.state.shape == (4, 16)
-    assert np.array_equal(result.state[:2], actions)
-    assert np.array_equal(result.state[2:], np.repeat(actions[-1:], 2, axis=0))
+    assert np.array_equal(result.state, actions)
     assert result.info["output_length"] == 4
     assert model.chunk_index == 1
 
@@ -119,7 +118,9 @@ def test_example_world_model_rejects_invalid_chunk_lengths_and_shapes() -> None:
     model = ExampleWorldModel(chunk_size=2)
     context = model.initialize(options=_options(model))
 
-    with pytest.raises(ValueError, match="between 1 and chunk_size"):
+    with pytest.raises(ValueError, match="equal chunk_size"):
+        model.sample_step(context.context, np.zeros((1, 16), dtype=np.float32))
+    with pytest.raises(ValueError, match="equal chunk_size"):
         model.sample_step(context.context, np.zeros((3, 16), dtype=np.float32))
     with pytest.raises(ValueError, match="shape"):
         model.sample_step(context.context, np.zeros((2, 15), dtype=np.float32))

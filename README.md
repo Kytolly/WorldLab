@@ -284,3 +284,17 @@ If reset, policy inference, environment stepping, agent observation, rendering,
 or a callback fails, WorldLab records a `RuntimeErrorEvent` with the exact
 runtime phase and traceback before re-raising the original exception.
 
+## v0.3.1 TODO
+
+This release uses fixed-length action chunks at the Environment boundary. A
+chunk whose leading dimension is not exactly `chunk_size` is rejected.
+
+- Decide where padding belongs: Policy, ActionAdapter, Simulator, or model.
+- Decide whether truncation means rejecting an oversized chunk or explicitly
+  slicing it before simulator execution.
+- Define variable-length action spaces without weakening fixed-shape batch
+  validation.
+- Add the optional Gymnasium Dict/Tuple adapter without making Gymnasium a core
+  dependency.
+- Define configuration-to-space construction and range normalization rules.
+
