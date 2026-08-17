@@ -298,3 +298,15 @@ chunk whose leading dimension is not exactly `chunk_size` is rejected.
   dependency.
 - Define configuration-to-space construction and range normalization rules.
 
+## v0.3.4 TODO
+
+`ComposableTask` now connects the three managers to the legacy `Task` interface
+with a fixed signal order and namespaced diagnostics. The following work remains
+intentionally deferred:
+
+- Define configuration/factory construction for managers and terms.
+- Add actor/critic observation selection.
+- Add optional Gymnasium conversion and integration tests.
+- Keep observation history, noise/corruption, vectorized execution, and async
+  reward batching out of this release.
+

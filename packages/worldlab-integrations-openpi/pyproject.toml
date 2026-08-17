@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "worldlab-integrations-openpi"
-version = "0.3.0"
+version = "0.3.4"
 description = "OpenPI policy integration for WorldLab"
 requires-python = ">=3.10"
 dependencies = [
-    "worldlab>=0.3.0,<0.4",
+    "worldlab>=0.3.4,<0.4",
     "numpy>=1.24",
     "openpi-client>=0.1",
     "websockets>=14,<16",

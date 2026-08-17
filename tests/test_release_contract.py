@@ -1,4 +1,4 @@
-"""Release-level checks for the v0.2.5 package and acceptance surface."""
+"""Release-level checks for the v0.3.4 package and acceptance surface."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def test_all_distributable_packages_share_the_release_version() -> None:
         ROOT / "packages" / "worldlab-integrations-openpi" / "pyproject.toml",
     )
 
-    assert {_project_version(path) for path in project_files} == {"0.3.0"}
+    assert {_project_version(path) for path in project_files} == {"0.3.4"}
 
 
 def test_runtime_acceptance_and_optional_protocol_fixtures_are_present() -> None:

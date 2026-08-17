@@ -64,6 +64,7 @@ from .demo import (
     run_deterministic_demo,
 )
 from .envs import (
+    ComposableTask,
     ExampleEnvironment,
     ExampleTask,
     GoalTask,
@@ -83,6 +84,19 @@ from .runtime import (
     TraceSink,
     TraceSource,
 )
+from .managers import (
+    ManagerTermError,
+    ObservationGroups,
+    ObservationManager,
+    ObservationTerm,
+    ObservationTermSpec,
+    RewardManager,
+    RewardTerm,
+    RewardTermSpec,
+    TerminationManager,
+    TerminationTerm,
+    TerminationTermSpec,
+)
 from .world_models import CounterWorldModel, ExampleWorldModel, WorldModel
 from .simulators import WorldModelSimulator
 
@@ -92,6 +106,7 @@ __all__ = [
     "AcceptanceReport",
     "Buffer",
     "ConfigError",
+    "ComposableTask",
     "config_to_dict",
     "ConstantPolicy",
     "CounterWorldModel",
@@ -110,11 +125,19 @@ __all__ = [
     "ObservationProvider",
     "LoopCallback",
     "LoopConfig",
+    "ManagerTermError",
+    "ObservationManager",
+    "ObservationGroups",
     "Policy",
     "PolicyActed",
     "PolicyAgent",
     "PolicyOutput",
+    "ObservationTerm",
+    "ObservationTermSpec",
+    "RewardManager",
     "RewardProvider",
+    "RewardTerm",
+    "RewardTermSpec",
     "ReplayBuffer",
     "ResetResult",
     "RuntimeErrorEvent",
@@ -158,6 +181,9 @@ __all__ = [
     "ExampleEnvironment",
     "ExampleTask",
     "TerminationProvider",
+    "TerminationManager",
+    "TerminationTerm",
+    "TerminationTermSpec",
     "TupleSpace",
     "build_demo",
     "build_configured_demo",
