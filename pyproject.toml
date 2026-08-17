@@ -27,6 +27,9 @@ dev = [
 ui = [
     "worldlab-ui-panel>=0.3.4,<0.4",
 ]
+transport = [
+    "worldlab-transport>=0.3.4,<0.4",
+]
 openpi = [
     "worldlab-integrations-openpi>=0.3.4,<0.4",
 ]
@@ -40,9 +43,13 @@ namespaces = false
 worldlab = ["py.typed"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = [
+    "src",
+    "packages/worldlab-transport/src",
+]
 testpaths = [
     "tests",
+    "packages/worldlab-transport/tests",
     "packages/worldlab-ui-panel/tests",
     "packages/worldlab-integrations-openpi/tests",
 ]
