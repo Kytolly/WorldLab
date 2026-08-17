@@ -7,6 +7,8 @@ import math
 from numbers import Real
 from typing import Any, Generic, Mapping, TypeVar
 
+from ._immutable import freeze_mapping
+
 
 ObservationT = TypeVar("ObservationT")
 
@@ -15,6 +17,9 @@ ObservationT = TypeVar("ObservationT")
 class ResetResult(Generic[ObservationT]):
     observation: ObservationT
     info: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "info", freeze_mapping(self.info))
 
 
 @dataclass(frozen=True)
@@ -26,6 +31,7 @@ class StepResult(Generic[ObservationT]):
     info: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "info", freeze_mapping(self.info))
         if not isinstance(self.reward, Real) or isinstance(self.reward, bool):
             raise ValueError("reward must be a finite scalar")
         if not math.isfinite(float(self.reward)):

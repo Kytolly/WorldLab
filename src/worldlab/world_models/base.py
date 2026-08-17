@@ -33,13 +33,6 @@ class WorldModel(ABC, Generic[ContextT, StateT, ActionT]):
     ) -> WorldModelStepResult[ContextT, StateT]:
         raise NotImplementedError
 
-    def rollout(
-        self,
-        context: ContextT,
-        actions: list[ActionT],
-    ) -> list[WorldModelStepResult[ContextT, StateT]]:
-        raise NotImplementedError("multi-step rollout is not implemented by this model")
-
     def render(self, context: ContextT, state: StateT) -> Any:
         return None
 

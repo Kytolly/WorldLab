@@ -8,7 +8,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from worldlab.core import ArraySpace, Environment, Task
-from worldlab.data import ResetResult, SimulationReset, SimulationStep, StepResult
+from worldlab.data import (
+    SIMULATION_OUTPUT,
+    ResetResult,
+    SimulationReset,
+    SimulationStep,
+    StepResult,
+)
 from worldlab.simulators import WorldModelSimulator
 from worldlab.world_models import ExampleWorldModel
 
@@ -38,11 +44,11 @@ class ExampleTask(Task[Array, Array, Array]):
         action: Array,
         simulation: SimulationStep[Array],
     ) -> StepResult[Array]:
-        del previous_state, action
+        del previous_state
         self._steps += 1
         info = {"goal": self.goal, "chunk_step": self._steps, **dict(simulation.info)}
-        info["action"] = simulation.action
-        info["frames"] = simulation.frames
+        info["action"] = action
+        info["frames"] = simulation.info.get(SIMULATION_OUTPUT)
         return StepResult(
             observation=simulation.state,
             reward=1.0,

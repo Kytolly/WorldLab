@@ -8,8 +8,8 @@ from typing import Any, Generic, Mapping, Optional, TypeVar, cast
 from worldlab.core import Simulator
 from worldlab.data import (
     SIMULATION_CHUNK_INDEX,
-    SIMULATION_FRAMES,
     SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_OUTPUT,
     SIMULATION_STATE,
     SimulationReset,
     SimulationStep,
@@ -80,22 +80,19 @@ class WorldModelSimulator(Simulator[StateT, ActionT], Generic[ContextT, StateT, 
         started_at = time.perf_counter()
         prediction = self.model.sample_step(self.context, action)
         model_latency_s = time.perf_counter() - started_at
-        prediction.validate(chunk_size=self.chunk_size)
+        prediction.validate()
         self._context = prediction.context
         self._state = prediction.state
         info = dict(prediction.info)
         info[SIMULATION_CHUNK_INDEX] = chunk_index
         info[SIMULATION_MODEL_LATENCY_S] = model_latency_s
         info[SIMULATION_STATE] = prediction.state
-        if prediction.frames is not None:
-            info["frames"] = prediction.frames
-            info[SIMULATION_FRAMES] = prediction.frames
+        if prediction.output is not None:
+            info[SIMULATION_OUTPUT] = prediction.output
         self._chunk_index += 1
         return SimulationStep(
             state=prediction.state,
             info=info,
-            action=action,
-            frames=prediction.frames,
         )
 
     def render(self) -> Any:

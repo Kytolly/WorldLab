@@ -222,3 +222,4 @@ model_zoo/
 dataset/
 .openpi_cache/
 .playwright-cli/
+session*

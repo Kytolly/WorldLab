@@ -56,9 +56,9 @@ def test_example_world_model_uses_generic_world_model_contract() -> None:
     actions = np.ones((2, 16), dtype=np.float32)
     result = _run(model, actions)
 
-    assert result.frames.shape == (4, 3, 3, 6, 8)
-    assert result.frames.dtype == np.float32
-    assert np.all((result.frames >= 0.0) & (result.frames <= 1.0))
+    assert result.output.shape == (4, 3, 3, 6, 8)
+    assert result.output.dtype == np.float32
+    assert np.all((result.output >= 0.0) & (result.output <= 1.0))
     assert result.state is not None
     assert result.state.shape == (4, 16)
     assert np.array_equal(result.state[:2], actions)
@@ -77,7 +77,7 @@ def test_example_world_model_is_repeatable_for_a_seed() -> None:
         )
         output = _run(model, np.arange(48, dtype=np.float32).reshape(3, 16))
         return (
-            cast(NDArray[Any], output.frames),
+            cast(NDArray[Any], output.output),
             output.state,
         )
 
@@ -98,7 +98,7 @@ def test_example_world_model_is_action_conditioned() -> None:
         )
         return cast(
             NDArray[Any],
-            _run(model, np.full((2, 16), action, dtype=np.float32)).frames,
+            _run(model, np.full((2, 16), action, dtype=np.float32)).output,
         )
 
     assert not np.array_equal(run(0.0), run(1.0))

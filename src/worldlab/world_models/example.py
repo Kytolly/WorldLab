@@ -7,7 +7,7 @@ from typing import Any, Mapping, Optional
 import numpy as np
 from numpy.typing import NDArray
 
-from worldlab.data import WorldModelContext, WorldModelStepResult
+from worldlab.data import SIMULATION_FRAMES, WorldModelContext, WorldModelStepResult
 
 from .base import WorldModel
 
@@ -171,12 +171,15 @@ class ExampleWorldModel(WorldModel[int, Array, Array]):
         return WorldModelStepResult(
             context=self._chunk_index,
             state=padded_actions.copy(),
-            frames=frames,
+            output=frames,
             info={
                 "chunk_index": self._chunk_index,
                 "action_length": int(actions.shape[0]),
                 "output_length": self.chunk_size,
                 "task": self._task,
+                # Legacy diagnostic key is owned by this video model, not by
+                # the generic WorldModelSimulator contract.
+                SIMULATION_FRAMES: frames,
             },
         )
 

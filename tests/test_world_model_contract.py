@@ -9,6 +9,7 @@ from worldlab import (
     SIMULATION_CHUNK_INDEX,
     SIMULATION_FRAMES,
     SIMULATION_MODEL_LATENCY_S,
+    SIMULATION_OUTPUT,
     SIMULATION_STATE,
     WorldModelStepResult,
     WorldModelSimulator,
@@ -21,30 +22,22 @@ def test_world_model_step_result_validates_chunk_outputs() -> None:
     result = WorldModelStepResult(
         context=1,
         state=np.zeros((2, 4), dtype=np.float32),
-        frames=np.zeros((2, 3, 2, 2, 2), dtype=np.float32),
+        output={"opaque": "model-specific"},
     )
 
-    result.validate(chunk_size=2)
+    result.validate()
     assert not hasattr(result, "action")
     assert not hasattr(result, "reward")
-    assert result.frames.shape == (2, 3, 2, 2, 2)
+    assert result.output == {"opaque": "model-specific"}
     assert result.state.shape == (2, 4)
 
 
-def test_world_model_step_result_rejects_invalid_outputs() -> None:
-    with pytest.raises(ValueError, match="chunk_size"):
-        WorldModelStepResult(
-            context=1,
-            state=np.zeros((3, 4), dtype=np.float32),
-            frames=np.zeros((3, 3, 2, 2, 2), dtype=np.float32),
-        ).validate(chunk_size=2)
-
-    with pytest.raises(ValueError, match="same leading sequence"):
-        WorldModelStepResult(
-            context=1,
-            state=np.zeros((1, 4), dtype=np.float32),
-            frames=np.zeros((2, 3, 2, 2, 2), dtype=np.float32),
-        )
+def test_world_model_step_result_does_not_interpret_output_shape() -> None:
+    WorldModelStepResult(
+        context=1,
+        state=np.zeros((3, 4), dtype=np.float32),
+        output=np.zeros((3, 3, 2, 2, 2), dtype=np.float32),
+    ).validate()
 
 
 def test_world_model_simulator_propagates_normalized_chunk_fields() -> None:
@@ -54,11 +47,12 @@ def test_world_model_simulator_propagates_normalized_chunk_fields() -> None:
 
     assert reset.state == 0
     assert step.state == 1
-    assert step.action == 1
-    assert step.frames is None
+    assert not hasattr(step, "action")
+    assert not hasattr(step, "frames")
     assert step.info[SIMULATION_CHUNK_INDEX] == 0
     assert step.info[SIMULATION_MODEL_LATENCY_S] >= 0.0
     assert step.info[SIMULATION_STATE] == 1
+    assert SIMULATION_OUTPUT not in step.info
     assert simulator.chunk_index == 1
 
     simulator.reset(options={"start": 10})
@@ -83,4 +77,5 @@ def test_example_environment_keeps_model_and_task_boundaries_explicit() -> None:
     assert step.info[SIMULATION_CHUNK_INDEX] == 0
     assert step.info[SIMULATION_MODEL_LATENCY_S] >= 0.0
     assert step.info[SIMULATION_FRAMES].shape == (4, 3, 3, 32, 32)
+    assert step.info[SIMULATION_OUTPUT].shape == (4, 3, 3, 32, 32)
     assert step.info[SIMULATION_STATE].shape == (4, 16)

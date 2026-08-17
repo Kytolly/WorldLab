@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "worldlab"
-version = "0.2.5"
+version = "0.3.0"
 description = "Framework-neutral reinforcement-learning environments powered by world models"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,10 +25,10 @@ dev = [
     "twine>=5.1",
 ]
 ui = [
-    "worldlab-ui-panel>=0.2.5,<0.3",
+    "worldlab-ui-panel>=0.3.0,<0.4",
 ]
 openpi = [
-    "worldlab-integrations-openpi>=0.2.5,<0.3",
+    "worldlab-integrations-openpi>=0.3.0,<0.4",
 ]
 
 [tool.setuptools.packages.find]
