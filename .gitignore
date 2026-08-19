@@ -218,8 +218,10 @@ __marimo__/
 .streamlit/secrets.toml
 
 model_zoo/
+temp/
 .openpi_cache/
 dataset/
 .openpi_cache/
 .playwright-cli/
 session*
+mermaid*

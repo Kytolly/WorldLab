@@ -310,3 +310,28 @@ intentionally deferred:
 - Keep observation history, noise/corruption, vectorized execution, and async
   reward batching out of this release.
 
+## v0.3.6
+
+The optional `worldlab-integrations-gesim` package provides a local
+Qwen2.5-VL-3B-Instruct World Judge. The base VLM is stored under
+`model_zoo/qwen/Qwen2.5-VL-3B-Instruct`; a separately trained GE-Sim success
+head is still required. `WorldJudge` is adapted through
+`GESimRewardProvider`, while `GESimWorldModelSimulator` can wrap either the
+author's local world model or its HTTP client. The package factory creates the
+Task, Environment, Agent, and EnvironmentLoop before execution; the runtime
+modules do not create one another implicitly.
+
+Deferred work is intentionally kept outside this release:
+
+- A trained GE-Sim success head and the paper's full training dataset.
+- Padding-aware valid-frame selection and variable-length chunks.
+- Asynchronous or batched Judge inference.
+- Judge-driven termination.
+- A concrete network protocol for a remote Judge service.
+
+`worldlab-transport` is no longer maintained or distributed. Networked
+components remain integration-owned: GE-Sim uses the author's
+`gesim.client.transport.WorldModelClient`, and OpenPI uses the author's
+`openpi-client` WebSocket client behind a WorldLab adapter. The core package
+does not define a generic transport dependency.
+

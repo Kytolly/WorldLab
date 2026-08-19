@@ -9,7 +9,7 @@ from worldlab.data import ResetResult, SimulationReset, SimulationStep, StepResu
 from worldlab.simulators import WorldModelSimulator
 from worldlab.world_models import CounterWorldModel
 
-from .simulator_env import SimulatorEnvironment
+from .world import SimulatorEnvironment
 from .wrappers import TimeLimitWrapper
 
 

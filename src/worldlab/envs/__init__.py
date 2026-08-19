@@ -1,7 +1,7 @@
 """WorldLab environment implementations."""
 
 from .toy import GoalTask, make_counter_environment
-from .simulator_env import SimulatorEnvironment
+from .world import SimulatorEnvironment, WorldEnvironment
 from .example import ExampleEnvironment, ExampleTask, make_example_environment
 from .composable_task import ComposableTask
 from .wrappers import (
@@ -20,6 +20,7 @@ __all__ = [
     "ObservationWrapper",
     "RewardWrapper",
     "SimulatorEnvironment",
+    "WorldEnvironment",
     "ExampleEnvironment",
     "ExampleTask",
     "make_example_environment",

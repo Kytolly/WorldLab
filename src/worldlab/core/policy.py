@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Generic, Mapping, Optional, TypeVar
+from typing import Any, Generic, Mapping, Optional, Protocol, TypeVar
 
 from worldlab.data import PolicyOutput
 
@@ -12,12 +11,11 @@ ObservationT = TypeVar("ObservationT")
 ActionT = TypeVar("ActionT")
 
 
-class Policy(ABC, Generic[ObservationT, ActionT]):
+class Policy(Protocol, Generic[ObservationT, ActionT]):
     def reset(self, *, seed: Optional[int] = None) -> None:
         return None
 
-    @abstractmethod
-    def act(
+    def infer(
         self,
         observation: ObservationT,
         *,

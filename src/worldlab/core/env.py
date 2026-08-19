@@ -3,28 +3,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Mapping, Optional, Protocol, TypeVar, runtime_checkable
+from typing import Any, Generic, Mapping, Optional, TypeVar
 
 from worldlab.data import ResetResult, SimulationReset, SimulationStep, StepResult
-
+from worldlab.core.spaces import Space
 
 ObservationT = TypeVar("ObservationT")
 ActionT = TypeVar("ActionT")
 StateT = TypeVar("StateT")
-SpaceValueT_co = TypeVar("SpaceValueT_co", covariant=True)
-
-
-@runtime_checkable
-class Space(Protocol[SpaceValueT_co]):
-    def sample(self) -> SpaceValueT_co:
-        ...
-
-    def contains(self, value: Any) -> bool:
-        ...
-
-    def seed(self, seed: Optional[int] = None) -> Any:
-        ...
-
 
 class Environment(ABC, Generic[ObservationT, ActionT]):
     observation_space: Space[ObservationT]

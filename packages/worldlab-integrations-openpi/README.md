@@ -3,8 +3,14 @@
 Optional OpenPI policy integration for WorldLab. The package implements the
 same msgpack-numpy WebSocket shape as the official OpenPI remote policy
 client. `OpenPIPolicy` delegates connection and inference to
-`openpi_client.websocket_client_policy.WebsocketClientPolicy`; WorldLab only
-adapts observations, validates actions, and converts the configured layout.
+`gesim.policies.openpi.OpenPIPolicy`; WorldLab only exposes the shared world
+model observation contract and validates the returned action chunk. The
+GE-Sim backend owns its OpenPI payload and action-layout conversion.
+
+The package keeps the author-compatible implementation in `src/gesim/` and
+the WorldLab adapter in `src/worldlab_openpi/`. The adapter owns the boundary
+between the two contracts; it does not introduce a second WebSocket client or
+depend on the removed `worldlab-transport` package.
 
 Install it with:
 
@@ -23,12 +29,25 @@ The submodule is not imported by the WorldLab core package. It is added to
 `PYTHONPATH` by the WorldLab serving script when loading the local OpenPI
 implementation.
 
-The adapter accepts an `OpenPIObservation` and returns a WorldLab
-`PolicyOutput` whose action shape is `(horizon, 16)`. The fixed target layout
-is the GE-style world-model layout:
+The adapter accepts the shared `gesim.types.Observation` produced by the
+GE-Sim world model and returns a WorldLab `PolicyOutput` whose action shape is
+`(horizon, 16)`. The fixed target layout is the GE-style world-model layout:
 
 ```text
 [L7_arm, L_grip, R7_arm, R_grip]
+```
+
+For tests or an in-process policy, pass an already-created GE-Sim policy
+backend with `OpenPIPolicy(backend=...)`. For a real serving process, pass the
+WebSocket URL and the adapter constructs
+`gesim.policies.openpi.OpenPIPolicy` as its backend.
+
+```text
+GESim world model
+    -> gesim.types.Observation
+        -> worldlab_openpi.OpenPIPolicy
+            -> GE-Sim/OpenPI backend
+                -> (T, 16) action chunk
 ```
 
 The deterministic fake server is kept under the package test module as a

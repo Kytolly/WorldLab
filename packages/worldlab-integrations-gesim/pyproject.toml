@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldlab-integrations-gesim"
+version = "0.3.6"
+description = "Optional GE-Sim World Judge integration for WorldLab"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "worldlab>=0.3.6,<0.4",
+    "numpy>=1.24",
+    "requests>=2.31",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+judge = [
+    "torch>=2.1",
+    "transformers>=4.49",
+    "qwen-vl-utils>=0.0.10",
+    "pillow>=10",
+    "safetensors>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["worldlab_gesim*", "gesim*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+worldlab_gesim = ["py.typed"]
+gesim = ["conditioning/*.so"]

@@ -2,14 +2,33 @@
 
 from __future__ import annotations
 
+import numpy as np
 import random
 from collections.abc import Mapping, Sequence
-from typing import Any, Optional, cast
+from typing import (
+    Any, 
+    Optional, 
+    TypeVar, 
+    Protocol, 
+    cast, 
+    runtime_checkable
+)
 
-import numpy as np
+SpaceValueT_co = TypeVar("SpaceValueT_co", covariant=True)
 
 
-class DiscreteSpace:
+@runtime_checkable
+class Space(Protocol[SpaceValueT_co]):
+    def sample(self) -> SpaceValueT_co:
+        ...
+
+    def contains(self, value: Any) -> bool:
+        ...
+
+    def seed(self, seed: Optional[int] = None) -> Any:
+        ...
+
+class DiscreteSpace(Space):
     """A minimal integer space compatible with WorldLab's Space protocol."""
 
     def __init__(self, size: int) -> None:
@@ -28,7 +47,7 @@ class DiscreteSpace:
         self._random.seed(seed)
 
 
-class ArraySpace:
+class ArraySpace(Space):
     """Small NumPy space for fixed-shape actions and observations."""
 
     def __init__(
@@ -96,7 +115,7 @@ class ArraySpace:
         self._random = np.random.default_rng(seed)
 
 
-class DictSpace:
+class DictSpace(Space):
     """A named recursive product of child spaces."""
 
     def __init__(self, spaces: Mapping[str, Any]) -> None:
@@ -118,7 +137,7 @@ class DictSpace:
         _seed_children(self.spaces.values(), seed)
 
 
-class TupleSpace:
+class TupleSpace(Space):
     """A positional recursive product of child spaces."""
 
     def __init__(self, spaces: Sequence[Any]) -> None:

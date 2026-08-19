@@ -28,4 +28,11 @@ class PolicyAgent(Agent[ObservationT, ActionT], Generic[ObservationT, ActionT]):
         deterministic: bool,
     ) -> PolicyOutput[ActionT]:
         del training
+        infer = getattr(type(self.policy), "infer", None)
+        if infer is not None and infer is not Policy.infer:
+            return self.policy.infer(
+                observation,
+                info=info,
+                deterministic=deterministic,
+            )
         return self.policy.act(observation, info=info, deterministic=deterministic)

@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "worldlab-ui-panel"
-version = "0.3.4"
+version = "0.3.6"
 description = "Panel dashboard for observing WorldLab runtime events"
 requires-python = ">=3.10"
 dependencies = [
-    "worldlab>=0.3.4,<0.4",
+    "worldlab>=0.3.6,<0.4",
     "panel>=1.5,<2",
     "pillow>=10",
 ]
